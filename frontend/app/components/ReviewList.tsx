@@ -116,7 +116,9 @@ export default function ReviewList() {
           </div>
 
           <div className="mb-4">
-            <p className="text-gray-700 leading-relaxed">{review.review_text}</p>
+            <p className="text-gray-700 leading-relaxed">
+              {review.review_text || "No comment provided."}
+            </p>
           </div>
 
           {review.landlord_name && (
