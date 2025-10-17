@@ -1,8 +1,19 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Prerequisites
+
+- Node.js 18 or later
+- npm (comes with Node.js)
+
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -28,6 +39,42 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Troubleshooting
+
+### 'next' is not recognized as an internal or external command
+
+If you see this error when running `npm run dev`, it means the dependencies haven't been installed yet. Follow these steps:
+
+1. **Install dependencies first:**
+   ```bash
+   npm install
+   ```
+
+2. **Then run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+**Alternative solutions if the issue persists:**
+
+- Use `npx` to run Next.js directly:
+  ```bash
+  npx next dev
+  ```
+
+- Verify your Node.js version (must be 18 or later):
+  ```bash
+  node --version
+  ```
+
+- If you have an old version, update Node.js from [nodejs.org](https://nodejs.org)
+
+- Clear npm cache and reinstall:
+  ```bash
+  npm cache clean --force
+  npm install
+  ```
 
 ## Deploy on Vercel
 

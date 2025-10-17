@@ -75,6 +75,20 @@ npm run dev
 
 The application will be available at `http://localhost:3000`
 
+### Troubleshooting
+
+**Issue: 'next' is not recognized as an internal or external command (Windows)**
+
+If you get this error when running `npm run dev`, it means you haven't installed the dependencies yet:
+
+1. Make sure you're in the `frontend` directory
+2. Run `npm install` first to install all dependencies
+3. Then run `npm run dev`
+
+Alternatively, you can use: `npx next dev`
+
+For more troubleshooting steps, see the [frontend README](frontend/README.md#troubleshooting).
+
 ## Usage
 
 1. **View Reviews**: Open `http://localhost:3000` to see all reviews
