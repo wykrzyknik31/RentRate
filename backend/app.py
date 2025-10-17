@@ -17,6 +17,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'rentrate.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.config['ENV'] = os.environ.get('FLASK_ENV', 'development')
+
+# Security configuration
+IS_PRODUCTION = app.config['ENV'] == 'production'
 
 db = SQLAlchemy(app)
 
@@ -195,7 +199,7 @@ def register():
         'token',
         token,
         httponly=True,
-        secure=False,  # Set to True in production with HTTPS
+        secure=IS_PRODUCTION,  # Only secure in production (requires HTTPS)
         samesite='Lax',
         max_age=7*24*60*60  # 7 days
     )
@@ -232,7 +236,7 @@ def login():
         'token',
         token,
         httponly=True,
-        secure=False,  # Set to True in production with HTTPS
+        secure=IS_PRODUCTION,  # Only secure in production (requires HTTPS)
         samesite='Lax',
         max_age=7*24*60*60  # 7 days
     )
@@ -249,7 +253,7 @@ def get_profile(current_user):
 def logout():
     """Logout user by clearing the token cookie"""
     response = make_response(jsonify({'message': 'Logout successful'}), 200)
-    response.set_cookie('token', '', expires=0, httponly=True, samesite='Lax')
+    response.set_cookie('token', '', expires=0, httponly=True, secure=IS_PRODUCTION, samesite='Lax')
     return response
 
 @app.route('/api/reviews', methods=['GET'])
