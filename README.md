@@ -22,6 +22,9 @@ RentRate is a full-stack web application that allows tenants to share their expe
 - ✅ Responsive design with modern UI
 - ✅ RESTful API endpoints
 - ✅ Real-time data fetching
+- ✅ User authentication and registration
+- ✅ JWT-based session management
+- ✅ Secure password hashing with bcrypt
 
 ## Getting Started
 
@@ -49,7 +52,13 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Run the Flask server:
+4. (Optional) Set environment variables for production:
+```bash
+export FLASK_ENV=production
+export SECRET_KEY=your-secure-random-secret-key
+```
+
+5. Run the Flask server:
 ```bash
 python app.py
 ```
@@ -92,9 +101,51 @@ For more troubleshooting steps, see the [frontend README](frontend/README.md#tro
 ## Usage
 
 1. **View Reviews**: Open `http://localhost:3000` to see all reviews
-2. **Add Review**: Click "Add Review" button to submit a new review
-3. **Fill Form**: Enter property details, your review, and optionally landlord information
-4. **Submit**: Click "Submit Review" to save your review
+2. **Register**: Click "Register" to create a new account
+3. **Login**: Click "Login" to access your account
+4. **Add Review**: Click "Add Review" button to submit a new review (requires login in future versions)
+5. **Fill Form**: Enter property details, your review, and optionally landlord information
+6. **Submit**: Click "Submit Review" to save your review
+
+## Testing
+
+### Running Tests
+
+The project includes comprehensive end-to-end tests using Playwright and pytest.
+
+1. Install test dependencies:
+```bash
+pip install -r tests/requirements.txt
+playwright install chromium
+```
+
+2. Make sure both backend and frontend servers are running:
+```bash
+# Terminal 1 - Backend
+cd backend
+source venv/bin/activate
+python app.py
+
+# Terminal 2 - Frontend
+cd frontend
+npm run dev
+```
+
+3. Run the tests:
+```bash
+pytest tests/test_auth.py -v
+```
+
+### Test Coverage
+
+The test suite covers:
+- User registration (success and validation failures)
+- User login (success and invalid credentials)
+- Email and password validation
+- Terms acceptance requirement
+- Duplicate email handling
+- Logout functionality
+- Protected endpoint access with and without authentication
 
 ## API Documentation
 
@@ -105,6 +156,47 @@ For more troubleshooting steps, see the [frontend README](frontend/README.md#tro
 GET /api/health
 ```
 Returns the API status.
+
+#### Authentication Endpoints
+
+##### Register User
+```
+POST /api/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecurePass123",
+  "username": "johndoe",  // optional
+  "terms_accepted": true
+}
+```
+Creates a new user account. Password must be at least 8 characters with 1 uppercase letter and 1 number. Returns JWT token in httpOnly cookie.
+
+##### Login
+```
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecurePass123"
+}
+```
+Authenticates user and returns JWT token in httpOnly cookie.
+
+##### Get Profile (Protected)
+```
+GET /api/profile
+Cookie: token=<jwt_token>
+```
+Returns the current user's profile. Requires valid JWT token.
+
+##### Logout
+```
+POST /api/logout
+```
+Clears the authentication token cookie.
 
 #### Get All Reviews
 ```
@@ -179,6 +271,13 @@ RentRate/
 
 ### Database Schema
 
+**User Table**
+- id (Primary Key)
+- email (String, Unique)
+- username (String, Optional)
+- password_hash (String)
+- created_at (DateTime)
+
 **Property Table**
 - id (Primary Key)
 - address (String)
@@ -197,7 +296,6 @@ RentRate/
 
 ## Future Enhancements
 
-- User authentication and authorization
 - Image uploads for properties
 - Advanced search and filtering
 - Landlord profiles
@@ -205,6 +303,9 @@ RentRate/
 - Email notifications
 - Property verification system
 - Mobile app
+- Password reset functionality
+- Email verification
+- Two-factor authentication
 
 ## License
 

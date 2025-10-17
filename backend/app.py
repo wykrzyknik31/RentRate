@@ -1,16 +1,26 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from flask_bcrypt import Bcrypt
+from datetime import datetime, timedelta
 import os
+import jwt
+import re
+from functools import wraps
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
+bcrypt = Bcrypt(app)
 
 # Database configuration
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'rentrate.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.config['ENV'] = os.environ.get('FLASK_ENV', 'development')
+
+# Security configuration
+IS_PRODUCTION = app.config['ENV'] == 'production'
 
 db = SQLAlchemy(app)
 
@@ -53,14 +63,198 @@ class Review(db.Model):
             'created_at': self.created_at.isoformat()
         }
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(80))
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'email': self.email,
+            'username': self.username,
+            'created_at': self.created_at.isoformat()
+        }
+
 # Initialize database
 with app.app_context():
     db.create_all()
+
+# Helper functions
+def validate_password(password):
+    """Validate password strength: min 8 chars, 1 uppercase, 1 number"""
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter"
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least one number"
+    return True, ""
+
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(pattern, email):
+        return False, "Invalid email format"
+    return True, ""
+
+def generate_token(user_id):
+    """Generate JWT token for user"""
+    payload = {
+        'user_id': user_id,
+        'exp': datetime.utcnow() + timedelta(days=7),
+        'iat': datetime.utcnow()
+    }
+    return jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+
+def token_required(f):
+    """Decorator to protect routes that require authentication"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        
+        # Check for token in cookies
+        if 'token' in request.cookies:
+            token = request.cookies.get('token')
+        # Also check Authorization header as fallback
+        elif 'Authorization' in request.headers:
+            auth_header = request.headers.get('Authorization')
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+        
+        if not token:
+            return jsonify({'error': 'Token is missing'}), 401
+        
+        try:
+            payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = User.query.get(payload['user_id'])
+            if not current_user:
+                return jsonify({'error': 'User not found'}), 401
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token has expired'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Invalid token'}), 401
+        
+        return f(current_user, *args, **kwargs)
+    
+    return decorated
 
 # API Routes
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({'status': 'healthy', 'message': 'RentRate API is running'}), 200
+
+# Authentication Routes
+@app.route('/api/register', methods=['POST'])
+def register():
+    """Register a new user"""
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data.get('email'):
+        return jsonify({'error': 'Email is required'}), 400
+    if not data.get('password'):
+        return jsonify({'error': 'Password is required'}), 400
+    if not data.get('terms_accepted'):
+        return jsonify({'error': 'You must accept the terms and conditions'}), 400
+    
+    # Validate email format
+    email_valid, email_error = validate_email(data['email'])
+    if not email_valid:
+        return jsonify({'error': email_error}), 400
+    
+    # Validate password strength
+    password_valid, password_error = validate_password(data['password'])
+    if not password_valid:
+        return jsonify({'error': password_error}), 400
+    
+    # Check if user already exists
+    if User.query.filter_by(email=data['email']).first():
+        return jsonify({'error': 'Email already registered'}), 409
+    
+    # Hash password
+    password_hash = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+    
+    # Create new user
+    user = User(
+        email=data['email'],
+        username=data.get('username'),
+        password_hash=password_hash
+    )
+    
+    db.session.add(user)
+    db.session.commit()
+    
+    # Generate token
+    token = generate_token(user.id)
+    
+    # Create response with token in httpOnly cookie
+    response = make_response(jsonify({
+        'message': 'User registered successfully',
+        'user': user.to_dict()
+    }), 201)
+    response.set_cookie(
+        'token',
+        token,
+        httponly=True,
+        secure=IS_PRODUCTION,  # Only secure in production (requires HTTPS)
+        samesite='Lax',
+        max_age=7*24*60*60  # 7 days
+    )
+    
+    return response
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    """Authenticate user and return JWT token"""
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data.get('email'):
+        return jsonify({'error': 'Email is required'}), 400
+    if not data.get('password'):
+        return jsonify({'error': 'Password is required'}), 400
+    
+    # Find user
+    user = User.query.filter_by(email=data['email']).first()
+    
+    # Check if user exists and password is correct
+    if not user or not bcrypt.check_password_hash(user.password_hash, data['password']):
+        return jsonify({'error': 'Invalid email or password'}), 401
+    
+    # Generate token
+    token = generate_token(user.id)
+    
+    # Create response with token in httpOnly cookie
+    response = make_response(jsonify({
+        'message': 'Login successful',
+        'user': user.to_dict()
+    }), 200)
+    response.set_cookie(
+        'token',
+        token,
+        httponly=True,
+        secure=IS_PRODUCTION,  # Only secure in production (requires HTTPS)
+        samesite='Lax',
+        max_age=7*24*60*60  # 7 days
+    )
+    
+    return response
+
+@app.route('/api/profile', methods=['GET'])
+@token_required
+def get_profile(current_user):
+    """Get current user profile (requires authentication)"""
+    return jsonify(current_user.to_dict()), 200
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    """Logout user by clearing the token cookie"""
+    response = make_response(jsonify({'message': 'Logout successful'}), 200)
+    response.set_cookie('token', '', expires=0, httponly=True, secure=IS_PRODUCTION, samesite='Lax')
+    return response
 
 @app.route('/api/reviews', methods=['GET'])
 def get_reviews():
