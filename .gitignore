@@ -41,6 +41,7 @@ venv/
 ENV/
 env/
 .venv
+test_venv/
 
 # Node
 node_modules/
