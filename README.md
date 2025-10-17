@@ -52,7 +52,13 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Run the Flask server:
+4. (Optional) Set environment variables for production:
+```bash
+export FLASK_ENV=production
+export SECRET_KEY=your-secure-random-secret-key
+```
+
+5. Run the Flask server:
 ```bash
 python app.py
 ```
