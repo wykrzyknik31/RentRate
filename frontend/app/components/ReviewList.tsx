@@ -42,7 +42,16 @@ export default function ReviewList() {
       const data = await response.json();
       setReviews(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      // Provide a more helpful error message when backend is not available
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        setError(
+          "Unable to connect to the backend server. Please make sure the backend is running on " +
+          API_URL +
+          ". See the README for setup instructions."
+        );
+      } else {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      }
     } finally {
       setLoading(false);
     }
