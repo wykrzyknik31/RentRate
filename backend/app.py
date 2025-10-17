@@ -35,7 +35,7 @@ class Review(db.Model):
     property_id = db.Column(db.Integer, db.ForeignKey('property.id'), nullable=False)
     reviewer_name = db.Column(db.String(100), nullable=False)
     rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
-    review_text = db.Column(db.Text, nullable=False)
+    review_text = db.Column(db.Text)  # Optional comment
     landlord_name = db.Column(db.String(100))
     landlord_rating = db.Column(db.Integer)  # 1-5 stars
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -80,9 +80,9 @@ def create_review():
     data = request.get_json()
     
     # Validate required fields
-    required_fields = ['address', 'property_type', 'reviewer_name', 'rating', 'review_text']
+    required_fields = ['address', 'property_type', 'reviewer_name', 'rating']
     for field in required_fields:
-        if field not in data:
+        if field not in data or not data[field]:
             return jsonify({'error': f'Missing required field: {field}'}), 400
     
     # Validate rating
@@ -107,7 +107,7 @@ def create_review():
         property_id=property.id,
         reviewer_name=data['reviewer_name'],
         rating=data['rating'],
-        review_text=data['review_text'],
+        review_text=data.get('review_text'),
         landlord_name=data.get('landlord_name'),
         landlord_rating=data.get('landlord_rating')
     )

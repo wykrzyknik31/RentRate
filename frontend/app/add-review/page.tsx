@@ -216,12 +216,11 @@ export default function AddReview() {
                 htmlFor="review_text"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Your Review *
+                Your Review
               </label>
               <textarea
                 id="review_text"
                 name="review_text"
-                required
                 value={formData.review_text}
                 onChange={handleChange}
                 rows={5}
