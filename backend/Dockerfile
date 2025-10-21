@@ -8,11 +8,11 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org -r requirements.txt
 
 # Install psycopg2 for PostgreSQL support and curl for healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
-    pip install --no-cache-dir psycopg2-binary && \
+    pip install --no-cache-dir --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org psycopg2-binary && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy backend code
