@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import "../i18n";
 
 export default function Register() {
   const router = useRouter();
+  const { t } = useTranslation("common");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -28,13 +31,13 @@ export default function Register() {
   const validatePassword = (password: string) => {
     const errors: string[] = [];
     if (password.length < 8) {
-      errors.push("at least 8 characters");
+      errors.push(t("register.passwordRequirements.length"));
     }
     if (!/[A-Z]/.test(password)) {
-      errors.push("one uppercase letter");
+      errors.push(t("register.passwordRequirements.uppercase"));
     }
     if (!/\d/.test(password)) {
-      errors.push("one number");
+      errors.push(t("register.passwordRequirements.number"));
     }
     return errors;
   };
@@ -62,19 +65,19 @@ export default function Register() {
 
     // Validate email
     if (!formData.email) {
-      setErrors({ ...errors, email: "Email is required", general: "" });
+      setErrors({ ...errors, email: t("register.emailRequired"), general: "" });
       setLoading(false);
       return;
     }
     if (!validateEmail(formData.email)) {
-      setErrors({ ...errors, email: "Invalid email format", general: "" });
+      setErrors({ ...errors, email: t("register.emailInvalid"), general: "" });
       setLoading(false);
       return;
     }
 
     // Validate password
     if (!formData.password) {
-      setErrors({ ...errors, password: "Password is required", general: "" });
+      setErrors({ ...errors, password: t("register.passwordRequired"), general: "" });
       setLoading(false);
       return;
     }
@@ -82,7 +85,7 @@ export default function Register() {
     if (passwordErrors.length > 0) {
       setErrors({
         ...errors,
-        password: `Password must contain ${passwordErrors.join(", ")}`,
+        password: t("register.passwordWeak", { requirements: passwordErrors.join(", ") }),
         general: "",
       });
       setLoading(false);
@@ -93,7 +96,7 @@ export default function Register() {
     if (!formData.terms_accepted) {
       setErrors({
         ...errors,
-        terms: "You must accept the terms and conditions",
+        terms: t("register.termsRequired"),
         general: "",
       });
       setLoading(false);
@@ -120,7 +123,7 @@ export default function Register() {
           email: "",
           password: "",
           terms: "",
-          general: data.error || "Registration failed. Please try again.",
+          general: data.error || t("register.registrationFailed"),
         });
       }
     } catch (error) {
@@ -128,7 +131,7 @@ export default function Register() {
         email: "",
         password: "",
         terms: "",
-        general: "Network error. Please check if the backend is running.",
+        general: t("register.networkError"),
       });
     } finally {
       setLoading(false);
@@ -140,7 +143,7 @@ export default function Register() {
       <header className="bg-blue-600 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4">
           <Link href="/">
-            <h1 className="text-3xl font-bold cursor-pointer">RentRate</h1>
+            <h1 className="text-3xl font-bold cursor-pointer">{t("nav.title")}</h1>
           </Link>
         </div>
       </header>
@@ -148,7 +151,7 @@ export default function Register() {
       <main className="container mx-auto px-4 py-8 max-w-md">
         <div className="bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
-            Create Account
+            {t("register.title")}
           </h2>
 
           <form onSubmit={handleSubmit}>
@@ -163,7 +166,7 @@ export default function Register() {
                 htmlFor="email"
                 className="block text-gray-700 font-medium mb-2"
               >
-                Email *
+                {t("register.email")}
               </label>
               <input
                 type="email"
@@ -176,7 +179,7 @@ export default function Register() {
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
-                placeholder="your@email.com"
+                placeholder={t("register.emailPlaceholder")}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -188,7 +191,7 @@ export default function Register() {
                 htmlFor="username"
                 className="block text-gray-700 font-medium mb-2"
               >
-                Username (Optional)
+                {t("register.username")}
               </label>
               <input
                 type="text"
@@ -197,7 +200,7 @@ export default function Register() {
                 value={formData.username}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="username"
+                placeholder={t("register.usernamePlaceholder")}
               />
             </div>
 
@@ -206,7 +209,7 @@ export default function Register() {
                 htmlFor="password"
                 className="block text-gray-700 font-medium mb-2"
               >
-                Password *
+                {t("register.password")}
               </label>
               <input
                 type="password"
@@ -219,14 +222,13 @@ export default function Register() {
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
-                placeholder="••••••••"
+                placeholder={t("register.passwordPlaceholder")}
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
               )}
               <p className="mt-1 text-sm text-gray-600">
-                Must be at least 8 characters with 1 uppercase letter and 1
-                number
+                {t("register.passwordHint")}
               </p>
             </div>
 
@@ -242,7 +244,7 @@ export default function Register() {
                   }`}
                 />
                 <span className="text-gray-700">
-                  I accept the terms and conditions *
+                  {t("register.termsAccept")}
                 </span>
               </label>
               {errors.terms && (
@@ -255,14 +257,14 @@ export default function Register() {
               disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading ? t("register.submitting") : t("register.submit")}
             </button>
           </form>
 
           <p className="mt-4 text-center text-gray-600">
-            Already have an account?{" "}
+            {t("register.haveAccount")}{" "}
             <Link href="/login" className="text-blue-600 hover:underline">
-              Log in
+              {t("register.loginLink")}
             </Link>
           </p>
         </div>

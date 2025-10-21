@@ -3,9 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Navbar() {
   const router = useRouter();
+  const { t } = useTranslation("common");
   const [user, setUser] = useState<{ username?: string; email: string } | null>(
     null
   );
@@ -53,25 +56,26 @@ export default function Navbar() {
         <div className="flex justify-between items-center">
           <div>
             <Link href="/">
-              <h1 className="text-3xl font-bold cursor-pointer">RentRate</h1>
+              <h1 className="text-3xl font-bold cursor-pointer">{t("nav.title")}</h1>
             </Link>
             <p className="text-blue-100 mt-2">
-              Review rooms, apartments, and landlords
+              {t("nav.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             {loading ? (
-              <div className="text-blue-100">Loading...</div>
+              <div className="text-blue-100">{t("nav.loading")}</div>
             ) : user ? (
               <>
                 <span className="text-white">
-                  Welcome, {user.username || user.email}!
+                  {t("nav.welcome", { name: user.username || user.email })}
                 </span>
                 <button
                   onClick={handleLogout}
                   className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition-colors"
                 >
-                  Logout
+                  {t("nav.logout")}
                 </button>
               </>
             ) : (
@@ -80,13 +84,13 @@ export default function Navbar() {
                   href="/login"
                   className="text-white hover:text-blue-100 transition-colors"
                 >
-                  Log In
+                  {t("nav.login")}
                 </Link>
                 <Link
                   href="/register"
                   className="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition-colors"
                 >
-                  Register
+                  {t("nav.register")}
                 </Link>
               </>
             )}

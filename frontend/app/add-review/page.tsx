@@ -3,11 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import "../i18n";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function AddReview() {
   const router = useRouter();
+  const { t } = useTranslation("common");
   const [formData, setFormData] = useState({
     address: "",
     property_type: "apartment",
@@ -53,9 +56,7 @@ export default function AddReview() {
       // Provide a more helpful error message when backend is not available
       if (err instanceof TypeError && err.message === "Failed to fetch") {
         setError(
-          "Unable to connect to the backend server. Please make sure the backend is running on " +
-          API_URL +
-          ". See the README for setup instructions."
+          t("addReview.backendError", { url: API_URL })
         );
       } else {
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -110,8 +111,8 @@ export default function AddReview() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-blue-600 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold">RentRate</h1>
-          <p className="text-blue-100 mt-2">Add a new review</p>
+          <h1 className="text-3xl font-bold">{t("nav.title")}</h1>
+          <p className="text-blue-100 mt-2">{t("addReview.title")}</p>
         </div>
       </header>
 
@@ -134,18 +135,18 @@ export default function AddReview() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            Back to Reviews
+            {t("addReview.backToReviews")}
           </Link>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
-            Submit Your Review
+            {t("addReview.submitYourReview")}
           </h2>
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-red-700">
-              Error: {error}
+              {t("addReview.error", { message: error })}
             </div>
           )}
 
@@ -156,7 +157,7 @@ export default function AddReview() {
                 htmlFor="address"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Property Address *
+                {t("addReview.propertyAddress")}
               </label>
               <input
                 type="text"
@@ -165,7 +166,7 @@ export default function AddReview() {
                 required
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="e.g., 123 Main St, Apt 4B"
+                placeholder={t("addReview.propertyAddressPlaceholder")}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -175,7 +176,7 @@ export default function AddReview() {
                 htmlFor="property_type"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Property Type *
+                {t("addReview.propertyType")}
               </label>
               <select
                 id="property_type"
@@ -185,9 +186,9 @@ export default function AddReview() {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="room">Room</option>
-                <option value="apartment">Apartment</option>
-                <option value="house">House</option>
+                <option value="room">{t("addReview.propertyTypeRoom")}</option>
+                <option value="apartment">{t("addReview.propertyTypeApartment")}</option>
+                <option value="house">{t("addReview.propertyTypeHouse")}</option>
               </select>
             </div>
 
@@ -197,7 +198,7 @@ export default function AddReview() {
                 htmlFor="reviewer_name"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Your Name *
+                {t("addReview.yourName")}
               </label>
               <input
                 type="text"
@@ -206,7 +207,7 @@ export default function AddReview() {
                 required
                 value={formData.reviewer_name}
                 onChange={handleChange}
-                placeholder="John Doe"
+                placeholder={t("addReview.yourNamePlaceholder")}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -214,7 +215,7 @@ export default function AddReview() {
             {/* Property Rating */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Property Rating *
+                {t("addReview.propertyRating")}
               </label>
               {renderStarSelector("rating")}
             </div>
@@ -225,7 +226,7 @@ export default function AddReview() {
                 htmlFor="review_text"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Your Review
+                {t("addReview.yourReview")}
               </label>
               <textarea
                 id="review_text"
@@ -233,7 +234,7 @@ export default function AddReview() {
                 value={formData.review_text}
                 onChange={handleChange}
                 rows={5}
-                placeholder="Share your experience with this property..."
+                placeholder={t("addReview.yourReviewPlaceholder")}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -241,7 +242,7 @@ export default function AddReview() {
             {/* Landlord Information (Optional) */}
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                Landlord Information (Optional)
+                {t("addReview.landlordInfo")}
               </h3>
 
               <div className="space-y-4">
@@ -250,7 +251,7 @@ export default function AddReview() {
                     htmlFor="landlord_name"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
-                    Landlord Name
+                    {t("addReview.landlordName")}
                   </label>
                   <input
                     type="text"
@@ -258,7 +259,7 @@ export default function AddReview() {
                     name="landlord_name"
                     value={formData.landlord_name}
                     onChange={handleChange}
-                    placeholder="Jane Smith"
+                    placeholder={t("addReview.landlordNamePlaceholder")}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -266,7 +267,7 @@ export default function AddReview() {
                 {formData.landlord_name && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Landlord Rating
+                      {t("addReview.landlordRating")}
                     </label>
                     {renderStarSelector("landlord_rating")}
                   </div>
@@ -281,13 +282,13 @@ export default function AddReview() {
                 disabled={loading}
                 className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {loading ? "Submitting..." : "Submit Review"}
+                {loading ? t("addReview.submitting") : t("addReview.submitReview")}
               </button>
               <Link
                 href="/"
                 className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700"
               >
-                Cancel
+                {t("addReview.cancel")}
               </Link>
             </div>
           </form>

@@ -1,0 +1,98 @@
+{
+  "nav": {
+    "title": "RentRate",
+    "subtitle": "Отзывы о комнатах, квартирах и владельцах",
+    "loading": "Загрузка...",
+    "welcome": "Добро пожаловать, {{name}}!",
+    "logout": "Выйти",
+    "login": "Войти",
+    "register": "Регистрация"
+  },
+  "home": {
+    "recentReviews": "Последние отзывы",
+    "addReview": "Добавить отзыв",
+    "footer": "© 2024 RentRate. Платформа для отзывов арендаторов."
+  },
+  "reviewList": {
+    "propertyRating": "Рейтинг недвижимости",
+    "noComment": "Комментарий не предоставлен.",
+    "landlord": "Владелец",
+    "landlordRating": "Рейтинг владельца",
+    "reviewedBy": "Отзыв от {{name}}",
+    "loading": "Загрузка...",
+    "error": "Ошибка: {{message}}",
+    "noReviews": "Отзывов пока нет. Будьте первым, кто добавит отзыв!",
+    "backendError": "Не удается подключиться к серверу бэкенда. Убедитесь, что бэкенд работает на {{url}}. Смотрите README для инструкций по настройке."
+  },
+  "addReview": {
+    "title": "Добавить новый отзыв",
+    "backToReviews": "Вернуться к отзывам",
+    "submitYourReview": "Отправить отзыв",
+    "error": "Ошибка: {{message}}",
+    "propertyAddress": "Адрес недвижимости *",
+    "propertyAddressPlaceholder": "например, ул. Главная 123, кв. 4Б",
+    "propertyType": "Тип недвижимости *",
+    "propertyTypeRoom": "Комната",
+    "propertyTypeApartment": "Квартира",
+    "propertyTypeHouse": "Дом",
+    "yourName": "Ваше имя *",
+    "yourNamePlaceholder": "Иван Петров",
+    "propertyRating": "Рейтинг недвижимости *",
+    "yourReview": "Ваш отзыв",
+    "yourReviewPlaceholder": "Поделитесь своим опытом об этой недвижимости...",
+    "landlordInfo": "Информация о владельце (необязательно)",
+    "landlordName": "Имя владельца",
+    "landlordNamePlaceholder": "Анна Смирнова",
+    "landlordRating": "Рейтинг владельца",
+    "submitReview": "Отправить отзыв",
+    "submitting": "Отправка...",
+    "cancel": "Отмена",
+    "backendError": "Не удается подключиться к серверу бэкенда. Убедитесь, что бэкенд работает на {{url}}. Смотрите README для инструкций по настройке."
+  },
+  "login": {
+    "title": "Войти",
+    "email": "Email",
+    "emailPlaceholder": "ваш@email.com",
+    "password": "Пароль",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Войти",
+    "submitting": "Вход...",
+    "noAccount": "Нет аккаунта?",
+    "registerLink": "Зарегистрироваться",
+    "emailRequired": "Email обязателен",
+    "passwordRequired": "Пароль обязателен",
+    "loginFailed": "Вход не выполнен. Попробуйте снова.",
+    "networkError": "Ошибка сети. Проверьте, работает ли бэкенд."
+  },
+  "register": {
+    "title": "Создать аккаунт",
+    "email": "Email *",
+    "emailPlaceholder": "ваш@email.com",
+    "username": "Имя пользователя (необязательно)",
+    "usernamePlaceholder": "имя_пользователя",
+    "password": "Пароль *",
+    "passwordPlaceholder": "••••••••",
+    "passwordHint": "Должен содержать минимум 8 символов, 1 заглавную букву и 1 цифру",
+    "termsAccept": "Я принимаю условия *",
+    "submit": "Создать аккаунт",
+    "submitting": "Создание аккаунта...",
+    "haveAccount": "Уже есть аккаунт?",
+    "loginLink": "Войти",
+    "emailRequired": "Email обязателен",
+    "emailInvalid": "Неверный формат email",
+    "passwordRequired": "Пароль обязателен",
+    "passwordWeak": "Пароль должен содержать {{requirements}}",
+    "passwordRequirements": {
+      "length": "минимум 8 символов",
+      "uppercase": "одну заглавную букву",
+      "number": "одну цифру"
+    },
+    "termsRequired": "Вы должны принять условия",
+    "registrationFailed": "Регистрация не удалась. Попробуйте снова.",
+    "networkError": "Ошибка сети. Проверьте, работает ли бэкенд."
+  },
+  "language": {
+    "name": "Русский",
+    "code": "RU"
+  }
+}

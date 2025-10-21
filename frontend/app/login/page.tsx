@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import "../i18n";
 
 export default function Login() {
   const router = useRouter();
+  const { t } = useTranslation("common");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -38,12 +41,12 @@ export default function Login() {
 
     // Validate inputs
     if (!formData.email) {
-      setErrors({ ...errors, email: "Email is required", general: "" });
+      setErrors({ ...errors, email: t("login.emailRequired"), general: "" });
       setLoading(false);
       return;
     }
     if (!formData.password) {
-      setErrors({ ...errors, password: "Password is required", general: "" });
+      setErrors({ ...errors, password: t("login.passwordRequired"), general: "" });
       setLoading(false);
       return;
     }
@@ -67,14 +70,14 @@ export default function Login() {
         setErrors({
           email: "",
           password: "",
-          general: data.error || "Login failed. Please try again.",
+          general: data.error || t("login.loginFailed"),
         });
       }
     } catch (error) {
       setErrors({
         email: "",
         password: "",
-        general: "Network error. Please check if the backend is running.",
+        general: t("login.networkError"),
       });
     } finally {
       setLoading(false);
@@ -86,14 +89,14 @@ export default function Login() {
       <header className="bg-blue-600 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4">
           <Link href="/">
-            <h1 className="text-3xl font-bold cursor-pointer">RentRate</h1>
+            <h1 className="text-3xl font-bold cursor-pointer">{t("nav.title")}</h1>
           </Link>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-md">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Log In</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">{t("login.title")}</h2>
 
           <form onSubmit={handleSubmit}>
             {errors.general && (
@@ -107,7 +110,7 @@ export default function Login() {
                 htmlFor="email"
                 className="block text-gray-700 font-medium mb-2"
               >
-                Email
+                {t("login.email")}
               </label>
               <input
                 type="email"
@@ -120,7 +123,7 @@ export default function Login() {
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
-                placeholder="your@email.com"
+                placeholder={t("login.emailPlaceholder")}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -132,7 +135,7 @@ export default function Login() {
                 htmlFor="password"
                 className="block text-gray-700 font-medium mb-2"
               >
-                Password
+                {t("login.password")}
               </label>
               <input
                 type="password"
@@ -145,7 +148,7 @@ export default function Login() {
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
-                placeholder="••••••••"
+                placeholder={t("login.passwordPlaceholder")}
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
@@ -157,14 +160,14 @@ export default function Login() {
               disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {loading ? "Logging in..." : "Log In"}
+              {loading ? t("login.submitting") : t("login.submit")}
             </button>
           </form>
 
           <p className="mt-4 text-center text-gray-600">
-            Don&apos;t have an account?{" "}
+            {t("login.noAccount")}{" "}
             <Link href="/register" className="text-blue-600 hover:underline">
-              Register
+              {t("login.registerLink")}
             </Link>
           </p>
         </div>
