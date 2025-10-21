@@ -144,8 +144,24 @@ def token_required(f):
 # API Routes
 @app.route('/', methods=['GET'])
 def root():
-    """Root endpoint - returns API status"""
-    return jsonify({'status': 'ok', 'message': 'RentRate API is running'}), 200
+    """Root endpoint - returns API status and available endpoints"""
+    return jsonify({
+        'status': 'ok',
+        'message': 'RentRate API is running',
+        'version': '1.0.0',
+        'endpoints': {
+            'health': '/api/health',
+            'reviews': '/api/reviews',
+            'properties': '/api/properties',
+            'auth': {
+                'register': '/api/register',
+                'login': '/api/login',
+                'profile': '/api/profile',
+                'logout': '/api/logout'
+            }
+        },
+        'documentation': 'See README.md for full API documentation'
+    }), 200
 
 @app.route('/api/health', methods=['GET'])
 def health():
