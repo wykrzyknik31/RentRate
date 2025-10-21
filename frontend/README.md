@@ -42,6 +42,37 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Troubleshooting
 
+### Module not found: Can't resolve 'i18next' (Windows + OneDrive)
+
+If you encounter the error `Module not found: Can't resolve 'i18next'` when running the dev server, especially on Windows with OneDrive sync enabled, this is a known issue with Turbopack's file watcher and Windows file system operations.
+
+**Solution implemented in this project:**
+
+The project uses a React Context Provider pattern for i18n initialization instead of side-effect imports. This ensures proper module resolution across different environments.
+
+**If you still experience issues:**
+
+1. **Clear the Next.js cache:**
+   ```bash
+   rm -rf .next
+   npm run dev
+   ```
+
+2. **Ensure dependencies are installed:**
+   ```bash
+   npm install
+   ```
+
+3. **If using OneDrive or other cloud sync:**
+   - Consider moving the project to a non-synced directory
+   - Or exclude the `node_modules` and `.next` folders from cloud sync
+   - Windows OneDrive can cause file locking issues with rapid file changes
+
+4. **Alternative: Use standard Next.js build (without Turbopack):**
+   ```bash
+   npm run dev -- --no-turbopack
+   ```
+
 ### 'next' is not recognized as an internal or external command
 
 If you see this error when running `npm run dev`, it means the dependencies haven't been installed yet. Follow these steps:
