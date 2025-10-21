@@ -4,7 +4,6 @@ import Link from "next/link";
 import ReviewList from "./components/ReviewList";
 import Navbar from "./components/Navbar";
 import { useTranslation } from "react-i18next";
-import "./i18n";
 
 export default function Home() {
   const { t } = useTranslation("common");
