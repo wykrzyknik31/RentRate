@@ -22,7 +22,12 @@
     "loading": "Ładowanie...",
     "error": "Błąd: {{message}}",
     "noReviews": "Brak opinii. Bądź pierwszą osobą, która doda opinię!",
-    "backendError": "Nie można połączyć się z serwerem backend. Upewnij się, że backend działa na {{url}}. Zobacz README po instrukcje konfiguracji."
+    "backendError": "Nie można połączyć się z serwerem backend. Upewnij się, że backend działa na {{url}}. Zobacz README po instrukcje konfiguracji.",
+    "translate": "Przetłumacz",
+    "showOriginal": "Pokaż oryginał",
+    "translating": "Tłumaczenie...",
+    "translationError": "Błąd tłumaczenia",
+    "translated": "Przetłumaczone z {{language}}"
   },
   "addReview": {
     "title": "Dodaj nową opinię",

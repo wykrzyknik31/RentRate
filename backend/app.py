@@ -7,6 +7,9 @@ import os
 import jwt
 import re
 from functools import wraps
+import langdetect
+import requests
+from langdetect import detect_langs, LangDetectException
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -87,6 +90,30 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'username': self.username,
+            'created_at': self.created_at.isoformat()
+        }
+
+class Translation(db.Model):
+    """Cache for translated texts to avoid repeated API calls"""
+    id = db.Column(db.Integer, primary_key=True)
+    original_text = db.Column(db.Text, nullable=False)
+    source_lang = db.Column(db.String(10), nullable=False)
+    target_lang = db.Column(db.String(10), nullable=False)
+    translated_text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Create unique constraint on original_text, source_lang, target_lang combination
+    __table_args__ = (
+        db.Index('idx_translation_lookup', 'original_text', 'source_lang', 'target_lang'),
+    )
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'original_text': self.original_text,
+            'source_lang': self.source_lang,
+            'target_lang': self.target_lang,
+            'translated_text': self.translated_text,
             'created_at': self.created_at.isoformat()
         }
 
@@ -388,6 +415,146 @@ def get_property(property_id):
         prop_dict['average_rating'] = 0
     
     return jsonify(prop_dict), 200
+
+@app.route('/api/translate', methods=['POST'])
+def translate_text():
+    """Translate text from one language to another using LibreTranslate API"""
+    data = request.get_json()
+    
+    # Validate required fields
+    if not data.get('text'):
+        return jsonify({'error': 'Text is required'}), 400
+    if not data.get('target_lang'):
+        return jsonify({'error': 'Target language is required'}), 400
+    
+    text = data['text']
+    target_lang = data['target_lang'].lower()
+    
+    # Detect source language if not provided
+    source_lang = data.get('source_lang')
+    if not source_lang:
+        try:
+            # Detect language with confidence score
+            detected = detect_langs(text)
+            if detected:
+                source_lang = detected[0].lang
+            else:
+                return jsonify({'error': 'Could not detect source language'}), 400
+        except LangDetectException:
+            return jsonify({'error': 'Could not detect source language'}), 400
+    else:
+        source_lang = source_lang.lower()
+    
+    # If source and target are the same, return original text
+    if source_lang == target_lang:
+        return jsonify({
+            'translated_text': text,
+            'source_lang': source_lang,
+            'target_lang': target_lang,
+            'from_cache': False
+        }), 200
+    
+    # Check cache first
+    cached_translation = Translation.query.filter_by(
+        original_text=text,
+        source_lang=source_lang,
+        target_lang=target_lang
+    ).first()
+    
+    if cached_translation:
+        return jsonify({
+            'translated_text': cached_translation.translated_text,
+            'source_lang': source_lang,
+            'target_lang': target_lang,
+            'from_cache': True
+        }), 200
+    
+    # Use LibreTranslate API for translation
+    # Get API URL from environment variable or use default public instance
+    libretranslate_url = os.environ.get('LIBRETRANSLATE_URL', 'https://libretranslate.com')
+    libretranslate_api_key = os.environ.get('LIBRETRANSLATE_API_KEY', '')
+    
+    try:
+        # Call LibreTranslate API
+        translate_url = f"{libretranslate_url}/translate"
+        payload = {
+            'q': text,
+            'source': source_lang,
+            'target': target_lang,
+            'format': 'text'
+        }
+        
+        if libretranslate_api_key:
+            payload['api_key'] = libretranslate_api_key
+        
+        response = requests.post(translate_url, json=payload, timeout=10)
+        
+        if response.status_code != 200:
+            return jsonify({
+                'error': 'Translation service error',
+                'details': response.text
+            }), 500
+        
+        result = response.json()
+        translated_text = result.get('translatedText', '')
+        
+        if not translated_text:
+            return jsonify({'error': 'Translation failed'}), 500
+        
+        # Cache the translation
+        new_translation = Translation(
+            original_text=text,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            translated_text=translated_text
+        )
+        db.session.add(new_translation)
+        db.session.commit()
+        
+        return jsonify({
+            'translated_text': translated_text,
+            'source_lang': source_lang,
+            'target_lang': target_lang,
+            'from_cache': False
+        }), 200
+        
+    except requests.exceptions.RequestException as e:
+        # Log the error for debugging but don't expose details to user
+        app.logger.error(f"Translation service error: {str(e)}")
+        return jsonify({
+            'error': 'Translation service unavailable'
+        }), 503
+    except Exception as e:
+        # Log the error for debugging but don't expose details to user
+        app.logger.error(f"Translation error: {str(e)}")
+        return jsonify({
+            'error': 'Translation failed'
+        }), 500
+
+@app.route('/api/detect-language', methods=['POST'])
+def detect_language():
+    """Detect the language of provided text"""
+    data = request.get_json()
+    
+    if not data.get('text'):
+        return jsonify({'error': 'Text is required'}), 400
+    
+    text = data['text']
+    
+    try:
+        # Detect language with confidence scores
+        detected = detect_langs(text)
+        if detected:
+            languages = [{'lang': d.lang, 'prob': d.prob} for d in detected]
+            return jsonify({
+                'detected_language': detected[0].lang,
+                'confidence': detected[0].prob,
+                'all_detected': languages
+            }), 200
+        else:
+            return jsonify({'error': 'Could not detect language'}), 400
+    except LangDetectException:
+        return jsonify({'error': 'Could not detect language'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
