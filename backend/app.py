@@ -278,8 +278,8 @@ def create_review():
     """Create a new review"""
     data = request.get_json()
     
-    # Validate required fields
-    required_fields = ['address', 'property_type', 'reviewer_name', 'rating']
+    # Validate required fields (reviewer_name is optional and defaults to "Anonymous")
+    required_fields = ['address', 'property_type', 'rating']
     for field in required_fields:
         if field not in data or not data[field]:
             return jsonify({'error': f'Missing required field: {field}'}), 400
@@ -301,10 +301,10 @@ def create_review():
         db.session.add(property)
         db.session.commit()
     
-    # Create review
+    # Create review (use "Anonymous" if reviewer_name is not provided)
     review = Review(
         property_id=property.id,
-        reviewer_name=data['reviewer_name'],
+        reviewer_name=data.get('reviewer_name', 'Anonymous') or 'Anonymous',
         rating=data['rating'],
         review_text=data.get('review_text'),
         landlord_name=data.get('landlord_name'),
