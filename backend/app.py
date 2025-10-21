@@ -519,14 +519,16 @@ def translate_text():
         }), 200
         
     except requests.exceptions.RequestException as e:
+        # Log the error for debugging but don't expose details to user
+        app.logger.error(f"Translation service error: {str(e)}")
         return jsonify({
-            'error': 'Translation service unavailable',
-            'details': str(e)
+            'error': 'Translation service unavailable'
         }), 503
     except Exception as e:
+        # Log the error for debugging but don't expose details to user
+        app.logger.error(f"Translation error: {str(e)}")
         return jsonify({
-            'error': 'Translation failed',
-            'details': str(e)
+            'error': 'Translation failed'
         }), 500
 
 @app.route('/api/detect-language', methods=['POST'])

@@ -25,6 +25,9 @@ RentRate is a full-stack web application that allows tenants to share their expe
 - ✅ User authentication and registration
 - ✅ JWT-based session management
 - ✅ Secure password hashing with bcrypt
+- ✅ **Multilingual support with automatic translation**
+- ✅ **Translate reviews written in different languages**
+- ✅ **Smart language detection for reviews**
 
 ## Getting Started
 
@@ -359,6 +362,30 @@ Required fields: `address`, `property_type`, `rating`
 ```
 GET /api/reviews/<review_id>
 ```
+
+#### Detect Language
+```
+POST /api/detect-language
+Content-Type: application/json
+
+{
+  "text": "Hello world"
+}
+```
+Detects the language of the provided text. Returns the detected language code and confidence score.
+
+#### Translate Text
+```
+POST /api/translate
+Content-Type: application/json
+
+{
+  "text": "Hello world",
+  "target_lang": "es",
+  "source_lang": "en"  // optional, will be auto-detected
+}
+```
+Translates text from source language to target language. Translations are cached to improve performance. See [TRANSLATION_SETUP.md](TRANSLATION_SETUP.md) for configuration details.
 
 #### Get All Properties
 ```
