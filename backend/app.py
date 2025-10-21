@@ -142,6 +142,11 @@ def token_required(f):
     return decorated
 
 # API Routes
+@app.route('/', methods=['GET'])
+def root():
+    """Root endpoint - returns API status"""
+    return jsonify({'status': 'ok', 'message': 'RentRate API is running'}), 200
+
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({'status': 'healthy', 'message': 'RentRate API is running'}), 200
