@@ -43,26 +43,47 @@ LIBRETRANSLATE_URL=https://libretranslate.com
 LIBRETRANSLATE_API_KEY=your_api_key_here
 ```
 
+### Default Configuration with Docker Compose
+
+The default `docker-compose.yml` includes a self-hosted LibreTranslate instance:
+- LibreTranslate runs as a service in the Docker network
+- Automatically configured with `LIBRETRANSLATE_URL=http://libretranslate:5000`
+- No API key required
+- Better performance and privacy than public instance
+- No rate limits
+
+To start all services including LibreTranslate:
+```bash
+docker-compose up -d
+```
+
 ### Using the Public LibreTranslate Instance
 
-The default configuration uses the public LibreTranslate instance at `https://libretranslate.com`. Note that:
+To use the public LibreTranslate instance at `https://libretranslate.com` instead:
+1. Remove the `libretranslate` service from `docker-compose.yml`
+2. Update the backend environment variable:
+```bash
+LIBRETRANSLATE_URL=https://libretranslate.com
+```
+
+Note that:
 - The public instance has rate limits
 - No API key is required
 - Service availability may vary
-- For production use, consider self-hosting or using a paid service
+- Network restrictions may prevent access
 
-### Self-Hosting LibreTranslate
+### Self-Hosting LibreTranslate Separately
 
-To self-host LibreTranslate for better performance and privacy:
+To self-host LibreTranslate outside of docker-compose:
 
 1. **Using Docker**:
 ```bash
-docker run -d -p 5000:5000 libretranslate/libretranslate
+docker run -d -p 5001:5000 libretranslate/libretranslate
 ```
 
 2. **Update the environment variable**:
 ```bash
-LIBRETRANSLATE_URL=http://localhost:5000
+LIBRETRANSLATE_URL=http://localhost:5001
 ```
 
 3. **For production**, follow the [LibreTranslate documentation](https://github.com/LibreTranslate/LibreTranslate)
