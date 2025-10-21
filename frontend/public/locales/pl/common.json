@@ -1,0 +1,98 @@
+{
+  "nav": {
+    "title": "RentRate",
+    "subtitle": "Przeglądaj pokoje, mieszkania i właścicieli",
+    "loading": "Ładowanie...",
+    "welcome": "Witaj, {{name}}!",
+    "logout": "Wyloguj",
+    "login": "Zaloguj się",
+    "register": "Zarejestruj się"
+  },
+  "home": {
+    "recentReviews": "Ostatnie opinie",
+    "addReview": "Dodaj opinię",
+    "footer": "© 2024 RentRate. Platforma do wystawiania opinii dla najemców."
+  },
+  "reviewList": {
+    "propertyRating": "Ocena nieruchomości",
+    "noComment": "Brak komentarza.",
+    "landlord": "Właściciel",
+    "landlordRating": "Ocena właściciela",
+    "reviewedBy": "Opinia wystawiona przez {{name}}",
+    "loading": "Ładowanie...",
+    "error": "Błąd: {{message}}",
+    "noReviews": "Brak opinii. Bądź pierwszą osobą, która doda opinię!",
+    "backendError": "Nie można połączyć się z serwerem backend. Upewnij się, że backend działa na {{url}}. Zobacz README po instrukcje konfiguracji."
+  },
+  "addReview": {
+    "title": "Dodaj nową opinię",
+    "backToReviews": "Powrót do opinii",
+    "submitYourReview": "Prześlij swoją opinię",
+    "error": "Błąd: {{message}}",
+    "propertyAddress": "Adres nieruchomości *",
+    "propertyAddressPlaceholder": "np. ul. Główna 123, Mieszkanie 4B",
+    "propertyType": "Typ nieruchomości *",
+    "propertyTypeRoom": "Pokój",
+    "propertyTypeApartment": "Mieszkanie",
+    "propertyTypeHouse": "Dom",
+    "yourName": "Twoje imię *",
+    "yourNamePlaceholder": "Jan Kowalski",
+    "propertyRating": "Ocena nieruchomości *",
+    "yourReview": "Twoja opinia",
+    "yourReviewPlaceholder": "Podziel się swoim doświadczeniem z tą nieruchomością...",
+    "landlordInfo": "Informacje o właścicielu (opcjonalnie)",
+    "landlordName": "Imię właściciela",
+    "landlordNamePlaceholder": "Anna Nowak",
+    "landlordRating": "Ocena właściciela",
+    "submitReview": "Prześlij opinię",
+    "submitting": "Przesyłanie...",
+    "cancel": "Anuluj",
+    "backendError": "Nie można połączyć się z serwerem backend. Upewnij się, że backend działa na {{url}}. Zobacz README po instrukcje konfiguracji."
+  },
+  "login": {
+    "title": "Zaloguj się",
+    "email": "Email",
+    "emailPlaceholder": "twoj@email.com",
+    "password": "Hasło",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Zaloguj się",
+    "submitting": "Logowanie...",
+    "noAccount": "Nie masz konta?",
+    "registerLink": "Zarejestruj się",
+    "emailRequired": "Email jest wymagany",
+    "passwordRequired": "Hasło jest wymagane",
+    "loginFailed": "Logowanie nie powiodło się. Spróbuj ponownie.",
+    "networkError": "Błąd sieci. Sprawdź, czy backend działa."
+  },
+  "register": {
+    "title": "Utwórz konto",
+    "email": "Email *",
+    "emailPlaceholder": "twoj@email.com",
+    "username": "Nazwa użytkownika (opcjonalnie)",
+    "usernamePlaceholder": "nazwa_użytkownika",
+    "password": "Hasło *",
+    "passwordPlaceholder": "••••••••",
+    "passwordHint": "Musi zawierać co najmniej 8 znaków, 1 dużą literę i 1 cyfrę",
+    "termsAccept": "Akceptuję regulamin *",
+    "submit": "Utwórz konto",
+    "submitting": "Tworzenie konta...",
+    "haveAccount": "Masz już konto?",
+    "loginLink": "Zaloguj się",
+    "emailRequired": "Email jest wymagany",
+    "emailInvalid": "Nieprawidłowy format email",
+    "passwordRequired": "Hasło jest wymagane",
+    "passwordWeak": "Hasło musi zawierać {{requirements}}",
+    "passwordRequirements": {
+      "length": "co najmniej 8 znaków",
+      "uppercase": "jedną dużą literę",
+      "number": "jedną cyfrę"
+    },
+    "termsRequired": "Musisz zaakceptować regulamin",
+    "registrationFailed": "Rejestracja nie powiodła się. Spróbuj ponownie.",
+    "networkError": "Błąd sieci. Sprawdź, czy backend działa."
+  },
+  "language": {
+    "name": "Polski",
+    "code": "PL"
+  }
+}

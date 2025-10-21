@@ -1,0 +1,98 @@
+{
+  "nav": {
+    "title": "RentRate",
+    "subtitle": "Review rooms, apartments, and landlords",
+    "loading": "Loading...",
+    "welcome": "Welcome, {{name}}!",
+    "logout": "Logout",
+    "login": "Log In",
+    "register": "Register"
+  },
+  "home": {
+    "recentReviews": "Recent Reviews",
+    "addReview": "Add Review",
+    "footer": "© 2024 RentRate. A platform for tenant reviews."
+  },
+  "reviewList": {
+    "propertyRating": "Property Rating",
+    "noComment": "No comment provided.",
+    "landlord": "Landlord",
+    "landlordRating": "Landlord Rating",
+    "reviewedBy": "Reviewed by {{name}}",
+    "loading": "Loading...",
+    "error": "Error: {{message}}",
+    "noReviews": "No reviews yet. Be the first to add a review!",
+    "backendError": "Unable to connect to the backend server. Please make sure the backend is running on {{url}}. See the README for setup instructions."
+  },
+  "addReview": {
+    "title": "Add a new review",
+    "backToReviews": "Back to Reviews",
+    "submitYourReview": "Submit Your Review",
+    "error": "Error: {{message}}",
+    "propertyAddress": "Property Address *",
+    "propertyAddressPlaceholder": "e.g., 123 Main St, Apt 4B",
+    "propertyType": "Property Type *",
+    "propertyTypeRoom": "Room",
+    "propertyTypeApartment": "Apartment",
+    "propertyTypeHouse": "House",
+    "yourName": "Your Name *",
+    "yourNamePlaceholder": "John Doe",
+    "propertyRating": "Property Rating *",
+    "yourReview": "Your Review",
+    "yourReviewPlaceholder": "Share your experience with this property...",
+    "landlordInfo": "Landlord Information (Optional)",
+    "landlordName": "Landlord Name",
+    "landlordNamePlaceholder": "Jane Smith",
+    "landlordRating": "Landlord Rating",
+    "submitReview": "Submit Review",
+    "submitting": "Submitting...",
+    "cancel": "Cancel",
+    "backendError": "Unable to connect to the backend server. Please make sure the backend is running on {{url}}. See the README for setup instructions."
+  },
+  "login": {
+    "title": "Log In",
+    "email": "Email",
+    "emailPlaceholder": "your@email.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Log In",
+    "submitting": "Logging in...",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "loginFailed": "Login failed. Please try again.",
+    "networkError": "Network error. Please check if the backend is running."
+  },
+  "register": {
+    "title": "Create Account",
+    "email": "Email *",
+    "emailPlaceholder": "your@email.com",
+    "username": "Username (Optional)",
+    "usernamePlaceholder": "username",
+    "password": "Password *",
+    "passwordPlaceholder": "••••••••",
+    "passwordHint": "Must be at least 8 characters with 1 uppercase letter and 1 number",
+    "termsAccept": "I accept the terms and conditions *",
+    "submit": "Create Account",
+    "submitting": "Creating Account...",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Log in",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email format",
+    "passwordRequired": "Password is required",
+    "passwordWeak": "Password must contain {{requirements}}",
+    "passwordRequirements": {
+      "length": "at least 8 characters",
+      "uppercase": "one uppercase letter",
+      "number": "one number"
+    },
+    "termsRequired": "You must accept the terms and conditions",
+    "registrationFailed": "Registration failed. Please try again.",
+    "networkError": "Network error. Please check if the backend is running."
+  },
+  "language": {
+    "name": "English",
+    "code": "EN"
+  }
+}

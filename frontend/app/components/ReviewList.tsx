@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Property {
   id: number;
@@ -24,6 +25,7 @@ interface Review {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function ReviewList() {
+  const { t } = useTranslation("common");
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,9 +47,7 @@ export default function ReviewList() {
       // Provide a more helpful error message when backend is not available
       if (err instanceof TypeError && err.message === "Failed to fetch") {
         setError(
-          "Unable to connect to the backend server. Please make sure the backend is running on " +
-          API_URL +
-          ". See the README for setup instructions."
+          t("reviewList.backendError", { url: API_URL })
         );
       } else {
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -87,7 +87,7 @@ export default function ReviewList() {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-        Error: {error}
+        {t("reviewList.error", { message: error })}
       </div>
     );
   }
@@ -96,7 +96,7 @@ export default function ReviewList() {
     return (
       <div className="bg-gray-100 border border-gray-200 rounded-lg p-8 text-center">
         <p className="text-gray-600 text-lg">
-          No reviews yet. Be the first to add a review!
+          {t("reviewList.noReviews")}
         </p>
       </div>
     );
@@ -119,14 +119,14 @@ export default function ReviewList() {
               </span>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-500 mb-1">Property Rating</p>
+              <p className="text-sm text-gray-500 mb-1">{t("reviewList.propertyRating")}</p>
               {renderStars(review.rating)}
             </div>
           </div>
 
           <div className="mb-4">
             <p className="text-gray-700 leading-relaxed">
-              {review.review_text || "No comment provided."}
+              {review.review_text || t("reviewList.noComment")}
             </p>
           </div>
 
@@ -134,7 +134,7 @@ export default function ReviewList() {
             <div className="border-t pt-4 mt-4">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-600">Landlord</p>
+                  <p className="text-sm text-gray-600">{t("reviewList.landlord")}</p>
                   <p className="font-medium text-gray-800">
                     {review.landlord_name}
                   </p>
@@ -142,7 +142,7 @@ export default function ReviewList() {
                 {review.landlord_rating && (
                   <div className="text-right">
                     <p className="text-sm text-gray-500 mb-1">
-                      Landlord Rating
+                      {t("reviewList.landlordRating")}
                     </p>
                     {renderStars(review.landlord_rating)}
                   </div>
@@ -152,7 +152,7 @@ export default function ReviewList() {
           )}
 
           <div className="mt-4 pt-4 border-t flex justify-between items-center text-sm text-gray-500">
-            <span>Reviewed by {review.reviewer_name}</span>
+            <span>{t("reviewList.reviewedBy", { name: review.reviewer_name })}</span>
             <span>{new Date(review.created_at).toLocaleDateString()}</span>
           </div>
         </div>
