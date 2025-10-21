@@ -30,9 +30,88 @@ RentRate is a full-stack web application that allows tenants to share their expe
 
 ### Prerequisites
 
+**Option 1: Using Docker (Recommended)**
+- Docker and Docker Compose
+
+**Option 2: Local Development**
 - Python 3.8+ with pip
 - Node.js 18+ with npm
 - Git
+
+### Quick Start with Docker
+
+The easiest way to run RentRate is using Docker Compose:
+
+1. Clone the repository:
+```bash
+git clone https://github.com/wykrzyknik31/RentRate.git
+cd RentRate
+```
+
+2. Build and start all services:
+```bash
+docker compose up --build
+```
+
+Or use the Makefile:
+```bash
+make up-build
+```
+
+3. Access the application:
+   - **Frontend**: http://localhost:3000
+   - **Backend API**: http://localhost:5000
+   - **Database**: localhost:5432 (PostgreSQL)
+
+4. Stop the services:
+```bash
+docker compose down
+```
+
+Or:
+```bash
+make down
+```
+
+#### Docker Commands
+
+The project includes a Makefile with convenient commands:
+
+- `make build` - Build all Docker images
+- `make up` - Start all services
+- `make up-build` - Build and start all services
+- `make up-d` - Start all services in detached mode
+- `make down` - Stop all services
+- `make restart` - Restart all services
+- `make logs` - Show logs from all services
+- `make logs-backend` - Show backend logs only
+- `make logs-frontend` - Show frontend logs only
+- `make logs-db` - Show database logs only
+- `make clean` - Stop and remove all containers, networks, and volumes
+- `make shell-backend` - Open shell in backend container
+- `make shell-frontend` - Open shell in frontend container
+- `make shell-db` - Open PostgreSQL shell
+
+#### Docker Architecture
+
+The Docker setup includes three services:
+
+1. **PostgreSQL Database** (port 5432)
+   - Official PostgreSQL 15 Alpine image
+   - Data persisted in Docker volume
+   - Healthcheck enabled
+
+2. **Flask Backend** (port 5000)
+   - Python 3.11 slim image
+   - Automatically connects to PostgreSQL
+   - Hot-reload enabled in development
+
+3. **Next.js Frontend** (port 3000)
+   - Node 18 Alpine image
+   - Connected to backend API
+   - Hot-reload enabled in development
+
+### Local Development Setup (Without Docker)
 
 ### Backend Setup
 

@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: rentrate-db
+    environment:
+      POSTGRES_USER: rentrate
+      POSTGRES_PASSWORD: rentrate
+      POSTGRES_DB: rentrate
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rentrate-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rentrate"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Flask Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rentrate-backend
+    environment:
+      - FLASK_ENV=development
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - DB_HOST=db
+      - POSTGRES_USER=rentrate
+      - POSTGRES_PASSWORD=rentrate
+      - POSTGRES_DB=rentrate
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - rentrate-network
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rentrate-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - rentrate-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+
+networks:
+  rentrate-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
