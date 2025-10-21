@@ -96,7 +96,30 @@ If you get this error when running `npm run dev`, it means you haven't installed
 
 Alternatively, you can use: `npx next dev`
 
-For more troubleshooting steps, see the [frontend README](frontend/README.md#troubleshooting).
+**Issue: Backend returns 404 errors**
+
+If you're getting 404 errors when accessing the backend (even though it's running):
+
+1. Use the clean start script:
+   ```bash
+   # Windows:
+   cd backend
+   start_clean.bat
+
+   # Linux/Mac:
+   cd backend
+   ./start_clean.sh
+   ```
+
+2. Verify the server is running:
+   - Open http://localhost:5000/ in your browser
+   - You should see: `{"message": "RentRate API is running", "status": "ok"}`
+
+3. Check the port in the server logs
+   - Look for: `Running on http://127.0.0.1:XXXX`
+   - Use that port number instead of 5000 if different
+
+For more troubleshooting steps, see the [backend README](backend/README.md#troubleshooting) and [frontend README](frontend/README.md#troubleshooting).
 
 ## Usage
 

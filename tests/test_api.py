@@ -35,6 +35,8 @@ class TestRootEndpoint:
         assert data['status'] == 'ok'
         assert 'message' in data
         assert 'RentRate API' in data['message']
+        assert 'version' in data
+        assert 'endpoints' in data
 
 
 class TestHealthEndpoint:
