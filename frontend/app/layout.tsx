@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { I18nProvider } from "./i18n";
 
 export const metadata: Metadata = {
   title: "RentRate - Review Rooms, Apartments, and Landlords",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body className="antialiased">
-        {children}
+        <I18nProvider>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );
