@@ -111,7 +111,24 @@ For more troubleshooting steps, see the [frontend README](frontend/README.md#tro
 
 ### Running Tests
 
-The project includes comprehensive end-to-end tests using Playwright and pytest.
+The project includes both unit tests for the API and end-to-end tests using Playwright.
+
+#### API Unit Tests
+
+Run the API unit tests (no servers needed):
+```bash
+pytest tests/test_api.py -v
+```
+
+These tests cover:
+- Root endpoint (GET /)
+- Health check endpoint
+- POST /api/reviews with valid data
+- POST /api/reviews with minimal/optional fields
+- POST /api/reviews validation (missing/invalid fields)
+- GET /api/reviews
+
+#### End-to-End Tests
 
 1. Install test dependencies:
 ```bash
@@ -139,7 +156,8 @@ pytest tests/test_auth.py -v
 ### Test Coverage
 
 The test suite covers:
-- User registration (success and validation failures)
+- **API Tests**: All API endpoints, validation, and error handling
+- **Authentication Tests**: User registration (success and validation failures)
 - User login (success and invalid credentials)
 - Email and password validation
 - Terms acceptance requirement
@@ -151,11 +169,25 @@ The test suite covers:
 
 ### Endpoints
 
+#### Root Endpoint
+```
+GET /
+```
+Returns the API status. Use this to verify the backend is running.
+
+Response:
+```json
+{
+  "status": "ok",
+  "message": "RentRate API is running"
+}
+```
+
 #### Health Check
 ```
 GET /api/health
 ```
-Returns the API status.
+Returns the API health status.
 
 #### Authentication Endpoints
 
@@ -212,13 +244,14 @@ Content-Type: application/json
 {
   "address": "123 Main St, Apt 4B",
   "property_type": "apartment",
-  "reviewer_name": "John Doe",
+  "reviewer_name": "John Doe",  // optional, defaults to "Anonymous"
   "rating": 4,
-  "review_text": "Great apartment!",
+  "review_text": "Great apartment!",  // optional
   "landlord_name": "Jane Smith",  // optional
   "landlord_rating": 5  // optional
 }
 ```
+Required fields: `address`, `property_type`, `rating`
 
 #### Get Single Review
 ```
