@@ -35,6 +35,9 @@ logs-frontend: ## Show frontend logs
 logs-db: ## Show database logs
 	docker compose logs -f db
 
+logs-translate: ## Show translation service logs
+	docker compose logs -f libretranslate
+
 ps: ## List running containers
 	docker compose ps
 
