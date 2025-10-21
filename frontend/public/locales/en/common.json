@@ -22,7 +22,12 @@
     "loading": "Loading...",
     "error": "Error: {{message}}",
     "noReviews": "No reviews yet. Be the first to add a review!",
-    "backendError": "Unable to connect to the backend server. Please make sure the backend is running on {{url}}. See the README for setup instructions."
+    "backendError": "Unable to connect to the backend server. Please make sure the backend is running on {{url}}. See the README for setup instructions.",
+    "translate": "Translate",
+    "showOriginal": "Show original",
+    "translating": "Translating...",
+    "translationError": "Translation failed",
+    "translated": "Translated from {{language}}"
   },
   "addReview": {
     "title": "Add a new review",
