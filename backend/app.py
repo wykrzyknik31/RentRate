@@ -14,7 +14,19 @@ bcrypt = Bcrypt(app)
 
 # Database configuration
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'rentrate.db')
+
+# Support both PostgreSQL (for Docker) and SQLite (for local development)
+db_host = os.environ.get('DB_HOST')
+if db_host:
+    # PostgreSQL configuration for Docker
+    postgres_user = os.environ.get('POSTGRES_USER', 'rentrate')
+    postgres_password = os.environ.get('POSTGRES_PASSWORD', 'rentrate')
+    postgres_db = os.environ.get('POSTGRES_DB', 'rentrate')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{postgres_user}:{postgres_password}@{db_host}:5432/{postgres_db}'
+else:
+    # SQLite configuration for local development
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'rentrate.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 app.config['ENV'] = os.environ.get('FLASK_ENV', 'development')
