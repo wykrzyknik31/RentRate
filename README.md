@@ -166,6 +166,7 @@ The Docker setup includes three services:
    - Automatically connects to PostgreSQL
    - Uses Google Translate API for translations
    - Hot-reload enabled in development
+   - **Automatic database migrations on startup**
 
 3. **Next.js Frontend** (port 3000)
    - Node 18 Alpine image
@@ -173,6 +174,28 @@ The Docker setup includes three services:
    - Hot-reload enabled in development
 
 **Translation Service**: Uses Google Translate API for reliable, high-quality translations. Requires a Google Cloud API key (see configuration section above).
+
+#### Database Migrations
+
+The backend automatically runs database migrations when the Docker container starts. This ensures your database schema is always up to date.
+
+**How it works:**
+1. The backend container runs `migrate_add_city.py` on startup
+2. The script checks if the database schema needs updates
+3. If the `city` column is missing from the `property` table, it's automatically added
+4. Existing properties get "Unknown" as the default city value
+5. The Flask application starts only after successful migration
+
+**Upgrading from older versions:**
+```bash
+# Simply pull and rebuild - migration happens automatically
+git pull
+docker compose down
+docker compose build
+docker compose up -d
+```
+
+For detailed migration information, see [Automatic Migration Setup Guide](./docs/AUTOMATIC_MIGRATION_SETUP.md).
 
 ### Local Development Setup (Without Docker)
 
@@ -511,6 +534,7 @@ RentRate/
 **Property Table**
 - id (Primary Key)
 - address (String)
+- city (String, required)
 - property_type (String: room/apartment/house)
 - created_at (DateTime)
 
