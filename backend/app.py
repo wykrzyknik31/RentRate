@@ -58,7 +58,7 @@ db = SQLAlchemy(app)
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(200), nullable=False)
-    city = db.Column(db.String(100))
+    city = db.Column(db.String(100), nullable=False)
     property_type = db.Column(db.String(50), nullable=False)  # room, apartment, house
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     reviews = db.relationship('Review', backref='property', lazy=True)
@@ -390,7 +390,7 @@ def create_review():
         files = []
     
     # Validate required fields (reviewer_name is optional and defaults to "Anonymous")
-    required_fields = ['address', 'property_type', 'rating']
+    required_fields = ['address', 'city', 'property_type', 'rating']
     for field in required_fields:
         if field not in data or not data[field]:
             return jsonify({'error': f'Missing required field: {field}'}), 400
@@ -416,13 +416,13 @@ def create_review():
     if not property:
         property = Property(
             address=data['address'],
-            city=data.get('city'),
+            city=data['city'],
             property_type=data['property_type']
         )
         db.session.add(property)
         db.session.commit()
-    elif data.get('city') and not property.city:
-        # Update city if provided and not already set
+    elif not property.city or property.city != data['city']:
+        # Update city if not set or if it changed
         property.city = data['city']
         db.session.commit()
     

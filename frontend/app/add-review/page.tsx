@@ -36,9 +36,7 @@ export default function AddReview() {
       
       // Add form fields
       formDataToSend.append("address", formData.address);
-      if (formData.city) {
-        formDataToSend.append("city", formData.city);
-      }
+      formDataToSend.append("city", formData.city);
       formDataToSend.append("property_type", formData.property_type);
       formDataToSend.append("reviewer_name", formData.reviewer_name);
       formDataToSend.append("rating", formData.rating.toString());
@@ -237,12 +235,13 @@ export default function AddReview() {
                 htmlFor="city"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                {t("addReview.city")}
+                {t("addReview.city")} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 id="city"
                 name="city"
+                required
                 value={formData.city}
                 onChange={handleChange}
                 placeholder={t("addReview.cityPlaceholder")}
