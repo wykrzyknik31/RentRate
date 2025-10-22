@@ -35,8 +35,11 @@ logs-frontend: ## Show frontend logs
 logs-db: ## Show database logs
 	docker compose logs -f db
 
-logs-translate: ## Show translation service logs
-	docker compose logs -f libretranslate
+logs-translate: ## Show translation service logs (if self-hosted)
+	@echo "Note: Translation service is not running locally by default."
+	@echo "The project uses the public LibreTranslate API."
+	@echo "If you've enabled local LibreTranslate, uncomment the service in docker-compose.yml"
+	@docker compose logs -f libretranslate 2>/dev/null || echo "LibreTranslate service not running"
 
 ps: ## List running containers
 	docker compose ps

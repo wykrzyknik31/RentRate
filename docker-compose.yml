@@ -19,35 +19,35 @@ services:
       timeout: 5s
       retries: 5
 
-  # LibreTranslate Service
-  libretranslate:
-    build:
-      context: ./libretranslate
-      dockerfile: Dockerfile
-    container_name: rentrate-libretranslate
-    ports:
-      - "5001:5000"
-    networks:
-      - rentrate-network
-    restart: unless-stopped
-    environment:
-      # SSL/TLS Configuration
-      - PYTHONHTTPSVERIFY=1
-      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-      # Optional: Set to 0 to disable SSL verification (not recommended for production)
-      # - PYTHONHTTPSVERIFY=0
-    volumes:
-      # Mount custom CA certificates if needed (e.g., for corporate proxies)
-      # Uncomment and add your custom CA certificate files to ./certs/
-      # - ./certs:/usr/local/share/ca-certificates/custom:ro
-      # LibreTranslate data for model persistence
-      - libretranslate_data:/home/libretranslate/.local
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5000/languages || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+  # LibreTranslate Service - Disabled (using public API instead)
+  # Note: The local LibreTranslate container was experiencing SSL certificate
+  # verification issues when downloading language models. We now use the public
+  # LibreTranslate API (https://libretranslate.com) instead.
+  #
+  # To re-enable local LibreTranslate, uncomment this service and update the
+  # LIBRETRANSLATE_URL in the backend service to: http://libretranslate:5000
+  #
+  # libretranslate:
+  #   build:
+  #     context: ./libretranslate
+  #     dockerfile: Dockerfile
+  #   container_name: rentrate-libretranslate
+  #   ports:
+  #     - "5001:5000"
+  #   networks:
+  #     - rentrate-network
+  #   restart: unless-stopped
+  #   environment:
+  #     - PYTHONHTTPSVERIFY=1
+  #     - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+  #   volumes:
+  #     - libretranslate_data:/home/libretranslate/.local
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -f http://localhost:5000/languages || exit 1"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 60s
 
   # Flask Backend
   backend:
@@ -62,13 +62,12 @@ services:
       - POSTGRES_USER=rentrate
       - POSTGRES_PASSWORD=rentrate
       - POSTGRES_DB=rentrate
-      - LIBRETRANSLATE_URL=http://libretranslate:5000
+      - LIBRETRANSLATE_URL=https://libretranslate.com
+      - LIBRETRANSLATE_API_KEY=
     ports:
       - "5000:5000"
     depends_on:
       db:
-        condition: service_healthy
-      libretranslate:
         condition: service_healthy
     networks:
       - rentrate-network
@@ -102,4 +101,4 @@ networks:
 
 volumes:
   postgres_data:
-  libretranslate_data:
+  # libretranslate_data: # Disabled - no longer needed with public API

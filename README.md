@@ -65,7 +65,7 @@ make up-build
    - **Frontend**: http://localhost:3000
    - **Backend API**: http://localhost:5000
    - **Database**: localhost:5432 (PostgreSQL)
-   - **Translation Service**: http://localhost:5001 (LibreTranslate)
+   - **Translation Service**: Public LibreTranslate API (https://libretranslate.com)
 
 4. Stop the services:
 ```bash

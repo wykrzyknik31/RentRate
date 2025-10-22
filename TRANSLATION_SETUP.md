@@ -45,32 +45,40 @@ LIBRETRANSLATE_API_KEY=your_api_key_here
 
 ### Default Configuration with Docker Compose
 
-The default `docker-compose.yml` includes a self-hosted LibreTranslate instance:
-- LibreTranslate runs as a service in the Docker network
-- Automatically configured with `LIBRETRANSLATE_URL=http://libretranslate:5000`
-- No API key required
-- Better performance and privacy than public instance
-- No rate limits
+**⚠️ IMPORTANT CHANGE**: As of the latest version, the project uses the **public LibreTranslate API** 
+instead of a self-hosted instance. This was changed because the local LibreTranslate container 
+was experiencing SSL certificate verification issues when downloading language models on startup.
 
-To start all services including LibreTranslate:
+The default `docker-compose.yml` now configures:
+- Uses the public LibreTranslate API at `https://libretranslate.com`
+- Automatically configured with `LIBRETRANSLATE_URL=https://libretranslate.com`
+- No API key required (optional for higher limits)
+- No local LibreTranslate container to manage
+- Simpler deployment and maintenance
+
+To start all services:
 ```bash
 docker-compose up -d
 ```
 
-### Using the Public LibreTranslate Instance
+Note about the public instance:
+- The public instance has rate limits (can be increased with an API key)
+- No API key is required for basic usage
+- Service availability is generally good
+- Network restrictions may prevent access in some environments
 
-To use the public LibreTranslate instance at `https://libretranslate.com` instead:
-1. Remove the `libretranslate` service from `docker-compose.yml`
-2. Update the backend environment variable:
-```bash
-LIBRETRANSLATE_URL=https://libretranslate.com
-```
+### Re-enabling Local LibreTranslate (Optional)
 
-Note that:
-- The public instance has rate limits
-- No API key is required
-- Service availability may vary
-- Network restrictions may prevent access
+If you prefer to self-host LibreTranslate (e.g., for privacy, performance, or offline usage):
+
+1. Uncomment the `libretranslate` service in `docker-compose.yml`
+2. Update the backend environment variable to: `LIBRETRANSLATE_URL=http://libretranslate:5000`
+3. Add the backend dependency on libretranslate service health check
+4. Uncomment the `libretranslate_data` volume
+5. Rebuild: `docker compose up --build`
+
+⚠️ Note: The local container may experience SSL certificate issues when downloading language models. 
+If you encounter these issues, refer to the troubleshooting section below.
 
 ### Self-Hosting LibreTranslate Separately
 
@@ -211,23 +219,36 @@ When using external translation APIs:
 - Check API key if required
 
 ### LibreTranslate Container Fails to Start (SSL Certificate Error)
-If you see SSL certificate verification errors in the logs:
+If you're trying to use the local LibreTranslate container and see SSL certificate verification errors:
 ```
 URLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED]'))
+Cannot update models (normal if you're offline): Download failed for Albanian → English
 IndexError: list index out of range
 ```
 
-**Solution**: The custom LibreTranslate Dockerfile already addresses this issue by:
-- Installing and updating CA certificates
-- Configuring SSL environment variables
-- Supporting custom CA certificates for corporate proxies
+**Root Cause**: LibreTranslate tries to download language models on startup, but SSL certificate 
+verification fails, causing the container to crash.
 
-**For corporate networks with custom CA certificates**:
-1. Create a `certs` directory and add your CA certificate files
-2. Uncomment the volume mount in `docker-compose.yml`
-3. Rebuild: `docker compose up --build`
+**Recommended Solution**: Use the public LibreTranslate API (default configuration):
+- The public API is stable and doesn't require downloading models
+- No SSL certificate issues
+- Simpler deployment
+- Already configured in the default `docker-compose.yml`
 
-See `libretranslate/README.md` for detailed instructions.
+**Alternative Solutions** (if you need to self-host):
+1. **Disable SSL verification** (not recommended for production):
+   - Set `PYTHONHTTPSVERIFY=0` in the libretranslate service environment
+   
+2. **For corporate networks with custom CA certificates**:
+   - Create a `certs` directory and add your CA certificate files
+   - Uncomment the volume mount in `docker-compose.yml`
+   - Rebuild: `docker compose up --build`
+   
+3. **Use pre-downloaded models**:
+   - Configure LibreTranslate to use offline mode with pre-installed models
+   - See [LibreTranslate documentation](https://github.com/LibreTranslate/LibreTranslate) for details
+
+See `libretranslate/README.md` for detailed instructions on self-hosting.
 
 ### Slow Translation Performance
 - Consider self-hosting for better performance
