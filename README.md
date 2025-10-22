@@ -65,6 +65,7 @@ make up-build
    - **Frontend**: http://localhost:3000
    - **Backend API**: http://localhost:5000
    - **Database**: localhost:5432 (PostgreSQL)
+   - **Translation Service**: http://localhost:5001 (LibreTranslate)
 
 4. Stop the services:
 ```bash
@@ -97,19 +98,25 @@ The project includes a Makefile with convenient commands:
 
 #### Docker Architecture
 
-The Docker setup includes three services:
+The Docker setup includes four services:
 
 1. **PostgreSQL Database** (port 5432)
    - Official PostgreSQL 15 Alpine image
    - Data persisted in Docker volume
    - Healthcheck enabled
 
-2. **Flask Backend** (port 5000)
+2. **LibreTranslate** (port 5001)
+   - Official LibreTranslate image for translation service
+   - Provides automatic translation for reviews
+   - No API key required (self-hosted)
+   - Healthcheck enabled
+
+3. **Flask Backend** (port 5000)
    - Python 3.11 slim image
-   - Automatically connects to PostgreSQL
+   - Automatically connects to PostgreSQL and LibreTranslate
    - Hot-reload enabled in development
 
-3. **Next.js Frontend** (port 3000)
+4. **Next.js Frontend** (port 3000)
    - Node 18 Alpine image
    - Connected to backend API
    - Hot-reload enabled in development

@@ -19,6 +19,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # LibreTranslate Service
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    container_name: rentrate-libretranslate
+    ports:
+      - "5001:5000"
+    networks:
+      - rentrate-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/languages || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Flask Backend
   backend:
     build:
@@ -32,10 +47,13 @@ services:
       - POSTGRES_USER=rentrate
       - POSTGRES_PASSWORD=rentrate
       - POSTGRES_DB=rentrate
+      - LIBRETRANSLATE_URL=http://libretranslate:5000
     ports:
       - "5000:5000"
     depends_on:
       db:
+        condition: service_healthy
+      libretranslate:
         condition: service_healthy
     networks:
       - rentrate-network
