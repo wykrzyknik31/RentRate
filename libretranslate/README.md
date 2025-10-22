@@ -1,20 +1,45 @@
-# LibreTranslate Custom Dockerfile
+# LibreTranslate Custom Dockerfile [DEPRECATED]
 
-This directory contains a custom Dockerfile for LibreTranslate that addresses SSL certificate verification issues.
+⚠️ **DEPRECATION NOTICE**: This LibreTranslate setup is no longer used in RentRate. The project has migrated to **Google Translate API** for more reliable and stable translations.
 
-## Problem Solved
+## Why We Migrated
 
-The base LibreTranslate image sometimes fails to start due to SSL certificate verification errors when downloading translation models. This happens particularly in:
+The LibreTranslate service was experiencing persistent issues:
+- SSL certificate verification errors when downloading language models
+- Container startup failures
+- Unreliable public API requiring authentication
+- Complex self-hosting requirements
+
+## Current Translation Service
+
+RentRate now uses **Google Cloud Translation API**, which provides:
+- ✅ Reliable 99.9% uptime SLA
+- ✅ High-quality neural machine translation
+- ✅ Support for 100+ languages
+- ✅ No container dependencies
+- ✅ Easy configuration via API key
+
+See [TRANSLATION_SETUP.md](../TRANSLATION_SETUP.md) for the current setup guide.
+
+---
+
+## Historical Documentation (For Reference Only)
+
+This directory previously contained a custom Dockerfile for LibreTranslate that addressed SSL certificate verification issues.
+
+### Problem Solved
+
+The base LibreTranslate image sometimes failed to start due to SSL certificate verification errors when downloading translation models. This happened particularly in:
 - Environments behind corporate proxies with custom CA certificates
 - Systems with outdated or missing CA certificates
 - Restricted network environments
 
-## Solution
+### Solution Provided
 
-This custom Dockerfile extends the base LibreTranslate image with:
-1. **Updated CA certificates**: Installs and updates `ca-certificates` package
-2. **Custom CA certificate support**: Provides a directory for mounting custom certificates
-3. **SSL configuration**: Sets environment variables for proper SSL/TLS handling
+This custom Dockerfile extended the base LibreTranslate image with:
+1. **Updated CA certificates**: Installed and updated `ca-certificates` package
+2. **Custom CA certificate support**: Provided a directory for mounting custom certificates
+3. **SSL configuration**: Set environment variables for proper SSL/TLS handling
 
 ## Usage
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-RentRate now includes an automatic translation feature that allows users to translate reviews written in different languages into their preferred UI language. The feature uses language detection and translation APIs to provide seamless multilingual support.
+RentRate includes an automatic translation feature that allows users to translate reviews written in different languages into their preferred UI language. The feature uses Google Translate API for reliable, high-quality translations with extensive language support.
 
 ## Features
 
@@ -12,103 +12,124 @@ RentRate now includes an automatic translation feature that allows users to tran
 - **Loading States**: Visual feedback during translation with spinner animation
 - **Error Handling**: Graceful error messages when translation fails
 - **Toggle Original/Translated**: Users can switch between original and translated text
-- **Multi-language Support**: Works with all languages supported by the translation provider
+- **Multi-language Support**: Supports 100+ languages via Google Translate API
+- **High Quality**: Enterprise-grade translation quality from Google's advanced neural machine translation
 
 ## How It Works
 
 1. When reviews are loaded, the backend detects the language of each review's text
 2. If a review's language differs from the UI language, a "Translate" button appears
-3. Clicking the button sends the text to the translation API
+3. Clicking the button sends the text to Google Translate API
 4. The translated text is displayed and cached for future use
 5. Users can toggle between original and translated text
 
 ## Translation Provider
 
-The feature uses **LibreTranslate**, an open-source translation API that can be:
-- Self-hosted for complete control and privacy
-- Used via the public instance (with rate limits)
-- Replaced with other providers (Google Translate, DeepL, etc.)
+The feature uses **Google Cloud Translation API**, which provides:
+- ✅ Reliable and stable API with 99.9% uptime SLA
+- ✅ High translation quality with neural machine translation
+- ✅ Support for 100+ languages
+- ✅ Automatic language detection
+- ✅ No SSL issues or container dependencies
+- ✅ Easy to configure and maintain
 
 ## Configuration
 
+### Prerequisites
+
+Before setting up translation, you need a Google Cloud API key:
+
+1. **Create a Google Cloud Project**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select an existing one
+
+2. **Enable Cloud Translation API**
+   - In your project, go to "APIs & Services" > "Library"
+   - Search for "Cloud Translation API"
+   - Click on it and press "Enable"
+
+3. **Create API Key**
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "API Key"
+   - Copy the API key (you can restrict it to Translation API for security)
+
 ### Backend Environment Variables
 
-Add these environment variables to configure the translation service:
+Add the Google Translate API key to your environment:
 
 ```bash
-# LibreTranslate API URL (default: public instance)
-LIBRETRANSLATE_URL=https://libretranslate.com
-
-# API Key (optional, required for some instances)
-LIBRETRANSLATE_API_KEY=your_api_key_here
+# Google Translate API Key (required for translation features)
+GOOGLE_TRANSLATE_API_KEY=your-google-api-key-here
 ```
 
-### Default Configuration with Docker Compose
+### Configuration with Docker Compose
 
-**⚠️ IMPORTANT CHANGE**: As of the latest version, the project uses the **public LibreTranslate API** 
-instead of a self-hosted instance. This was changed because the local LibreTranslate container 
-was experiencing SSL certificate verification issues when downloading language models on startup.
+The `.env` file should include:
 
-The default `docker-compose.yml` now configures:
-- Uses the public LibreTranslate API at `https://libretranslate.com`
-- Automatically configured with `LIBRETRANSLATE_URL=https://libretranslate.com`
-- No API key required (optional for higher limits)
-- No local LibreTranslate container to manage
-- Simpler deployment and maintenance
+```bash
+# Copy .env.example to .env
+cp .env.example .env
+
+# Edit .env and add your Google Translate API key
+GOOGLE_TRANSLATE_API_KEY=your-google-api-key-here
+```
 
 To start all services:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-Note about the public instance:
-- The public instance has rate limits (can be increased with an API key)
-- No API key is required for basic usage
-- Service availability is generally good
-- Network restrictions may prevent access in some environments
+### Local Development Setup
 
-### Re-enabling Local LibreTranslate (Optional)
+For local development without Docker:
 
-If you prefer to self-host LibreTranslate (e.g., for privacy, performance, or offline usage):
-
-1. Uncomment the `libretranslate` service in `docker-compose.yml`
-2. Update the backend environment variable to: `LIBRETRANSLATE_URL=http://libretranslate:5000`
-3. Add the backend dependency on libretranslate service health check
-4. Uncomment the `libretranslate_data` volume
-5. Rebuild: `docker compose up --build`
-
-⚠️ Note: The local container may experience SSL certificate issues when downloading language models. 
-If you encounter these issues, refer to the troubleshooting section below.
-
-### Self-Hosting LibreTranslate Separately
-
-To self-host LibreTranslate outside of docker-compose:
-
-1. **Using Docker**:
+1. **Install backend dependencies**:
 ```bash
-docker run -d -p 5001:5000 libretranslate/libretranslate
+cd backend
+pip install -r requirements.txt
 ```
 
-2. **Update the environment variable**:
+2. **Set environment variable**:
 ```bash
-LIBRETRANSLATE_URL=http://localhost:5001
+# On Linux/Mac
+export GOOGLE_TRANSLATE_API_KEY=your-google-api-key-here
+
+# On Windows
+set GOOGLE_TRANSLATE_API_KEY=your-google-api-key-here
 ```
 
-3. **For production**, follow the [LibreTranslate documentation](https://github.com/LibreTranslate/LibreTranslate)
+3. **Start the backend**:
+```bash
+python app.py
+```
 
-### Using Alternative Translation Providers
+## Pricing
 
-To use Google Translate, DeepL, or other providers:
+Google Cloud Translation API pricing (as of 2024):
+- **Free tier**: $10 credit per month (approximately 500,000 characters)
+- **Pay-as-you-go**: $20 per million characters
+- **Translation API Basic**: Best for most use cases
+- **Translation API Advanced**: For higher quality and additional features
 
-1. Modify the `/api/translate` endpoint in `backend/app.py`
-2. Replace the LibreTranslate API call with your chosen provider's API
-3. Update the environment variables accordingly
+For most small to medium applications, the free tier is sufficient. Monitor usage in the Google Cloud Console.
 
-Example providers:
-- **Google Cloud Translation API**: High quality, pay-per-use
-- **DeepL API**: High quality, limited free tier
-- **Azure Translator**: Enterprise-grade, Microsoft Azure
-- **AWS Translate**: Scalable, Amazon Web Services
+## Security Best Practices
+
+1. **API Key Security**:
+   - Never commit API keys to version control
+   - Use environment variables for API keys
+   - Restrict API key to Translation API only
+   - Set up API key restrictions (HTTP referrer or IP address)
+
+2. **Rate Limiting**:
+   - Implement rate limiting in your application
+   - Cache translations to reduce API calls
+   - Monitor usage to avoid unexpected charges
+
+3. **Error Handling**:
+   - Implement proper error handling for API failures
+   - Provide fallback behavior when translation is unavailable
+   - Log errors for monitoring and debugging
 
 ## API Endpoints
 
@@ -174,7 +195,7 @@ CREATE INDEX idx_translation_lookup ON translation(original_text, source_lang, t
 
 ## Supported Languages
 
-The feature supports all languages that LibreTranslate supports. Common languages include:
+Google Translate API supports 100+ languages. Common languages include:
 
 - English (en)
 - Spanish (es)
@@ -188,22 +209,29 @@ The feature supports all languages that LibreTranslate supports. Common language
 - Japanese (ja)
 - Korean (ko)
 - Arabic (ar)
-- And many more...
+- Hindi (hi)
+- Turkish (tr)
+- Vietnamese (vi)
+- And 85+ more languages...
+
+For the complete list, see [Google Translate Language Support](https://cloud.google.com/translate/docs/languages).
 
 ## Performance Considerations
 
-1. **Caching**: Translations are cached to reduce API calls
+1. **Caching**: Translations are cached to reduce API calls and costs
 2. **Async Detection**: Language detection happens in the background
 3. **Rate Limiting**: Consider implementing rate limiting for the translation endpoint
-4. **Cost**: Self-hosting is recommended for high-volume applications
+4. **Cost Optimization**: Monitor usage and implement caching strategies
+5. **Batch Processing**: For large volumes, consider batch translation requests
 
 ## Privacy Notice
 
-When using external translation APIs:
-- Review text is sent to the translation service
+When using Google Translate API:
+- Review text is sent to Google's translation service
+- Data is processed according to [Google Cloud Privacy Policy](https://cloud.google.com/terms/cloud-privacy-notice)
 - Consider adding a privacy notice in your terms of service
-- Self-hosting provides complete data control
-- LibreTranslate is open-source and respects privacy
+- Google does not use customer data to train their models
+- Data is encrypted in transit and at rest
 
 ## Troubleshooting
 
@@ -213,65 +241,110 @@ When using external translation APIs:
 - Ensure the detected language differs from UI language
 
 ### Translation Fails with 503 Error
-- The translation service may be unavailable
-- Check `LIBRETRANSLATE_URL` is correct
-- Try self-hosting LibreTranslate
-- Check API key if required
+**Symptoms**: Translation requests return "Translation service not configured"
 
-### LibreTranslate Container Fails to Start (SSL Certificate Error)
-If you're trying to use the local LibreTranslate container and see SSL certificate verification errors:
-```
-URLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED]'))
-Cannot update models (normal if you're offline): Download failed for Albanian → English
-IndexError: list index out of range
-```
+**Solution**:
+1. Verify `GOOGLE_TRANSLATE_API_KEY` is set in your `.env` file
+2. Check that the API key is valid in Google Cloud Console
+3. Ensure Cloud Translation API is enabled for your project
+4. Restart the backend service after adding the API key:
+   ```bash
+   docker compose restart backend
+   ```
 
-**Root Cause**: LibreTranslate tries to download language models on startup, but SSL certificate 
-verification fails, causing the container to crash.
+### Translation Fails with 400 Error
+**Symptoms**: Translation requests return invalid parameter errors
 
-**Recommended Solution**: Use the public LibreTranslate API (default configuration):
-- The public API is stable and doesn't require downloading models
-- No SSL certificate issues
-- Simpler deployment
-- Already configured in the default `docker-compose.yml`
+**Solution**:
+1. Check that the language codes are valid (e.g., 'en', 'es', 'pl')
+2. Ensure the text is not empty
+3. Verify the API key has not expired or been revoked
 
-**Alternative Solutions** (if you need to self-host):
-1. **Disable SSL verification** (not recommended for production):
-   - Set `PYTHONHTTPSVERIFY=0` in the libretranslate service environment
-   
-2. **For corporate networks with custom CA certificates**:
-   - Create a `certs` directory and add your CA certificate files
-   - Uncomment the volume mount in `docker-compose.yml`
-   - Rebuild: `docker compose up --build`
-   
-3. **Use pre-downloaded models**:
-   - Configure LibreTranslate to use offline mode with pre-installed models
-   - See [LibreTranslate documentation](https://github.com/LibreTranslate/LibreTranslate) for details
+### High API Costs
+**Symptoms**: Unexpected charges from Google Cloud
 
-See `libretranslate/README.md` for detailed instructions on self-hosting.
+**Solution**:
+1. Check translation cache is working (monitor database)
+2. Review API usage in Google Cloud Console
+3. Set up budget alerts in Google Cloud
+4. Implement rate limiting in your application
+5. Consider caching more aggressively
+
+### API Key Security Issues
+**Symptoms**: Unauthorized API usage or exposed API key
+
+**Solution**:
+1. Regenerate the API key immediately
+2. Add API key restrictions (HTTP referrer or IP address)
+3. Review and restrict API key to only Translation API
+4. Check application logs for suspicious activity
+5. Set up Cloud Monitoring alerts
 
 ### Slow Translation Performance
-- Consider self-hosting for better performance
-- Ensure database indexes are created
-- Check network latency to translation service
+**Symptoms**: Translations take a long time to complete
+
+**Solution**:
+1. Check your internet connection speed
+2. Ensure translation cache is working (check database)
+3. Monitor Google Cloud Translation API latency
+4. Consider using a CDN or regional endpoints
+5. Review network routing and firewall rules
 
 ### Cache Not Working
-- Verify the Translation table exists
-- Check database write permissions
-- Look for errors in backend logs
+**Symptoms**: Same translations trigger API calls repeatedly
+
+**Solution**:
+1. Verify the Translation table exists in the database
+2. Check database write permissions
+3. Review backend logs for cache errors
+4. Ensure database migrations have run
+5. Check database connection is stable
 
 ## Testing
 
 Run the translation tests:
 ```bash
-pytest tests/test_translation.py -v
+cd /home/runner/work/RentRate/RentRate
+pytest tests/test_translation*.py -v
 ```
 
 The test suite covers:
 - Language detection
-- Translation with caching
-- Error handling
-- API validation
+- Translation with Google Translate API
+- Translation caching
+- Error handling and edge cases
+- API configuration
+- Logging and monitoring
+
+All tests use mocked Google Translate API responses to avoid actual API calls during testing.
+
+## Monitoring and Analytics
+
+### Google Cloud Console
+
+Monitor your translation usage:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Select your project
+3. Navigate to "APIs & Services" > "Dashboard"
+4. Click on "Cloud Translation API"
+5. View usage metrics, quotas, and errors
+
+### Application Logs
+
+The backend logs detailed information about translations:
+- Translation requests (source, target, text length)
+- Successful translations
+- Errors with full tracebacks
+- Cache hits and misses
+
+View logs:
+```bash
+# Docker
+docker compose logs backend -f
+
+# Local development
+# Check console output where app.py is running
+```
 
 ## Future Enhancements
 
@@ -279,14 +352,20 @@ Potential improvements:
 - Batch translation for multiple reviews
 - User preference for auto-translate
 - Translation quality feedback
-- Support for multiple translation providers
-- Translation of property addresses
-- Translation history and management
+- Support for multiple translation providers (DeepL, Azure, AWS)
+- Translation of property addresses and landlord names
+- Translation history and management dashboard
+- Cost tracking and budget management
+- A/B testing different translation providers
 
 ## Support
 
 For issues or questions:
-1. Check the backend logs for error messages
-2. Verify API endpoint connectivity
-3. Review the LibreTranslate documentation
-4. Open an issue on the GitHub repository
+1. Check the backend logs for detailed error messages
+2. Verify Google Cloud Translation API is enabled
+3. Review [Google Cloud Translation API documentation](https://cloud.google.com/translate/docs)
+4. Check [Google Cloud Status Dashboard](https://status.cloud.google.com/)
+5. Open an issue on the GitHub repository with:
+   - Error messages from logs
+   - Steps to reproduce
+   - Environment details (Docker/local, OS, etc.)

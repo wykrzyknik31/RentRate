@@ -23,35 +23,10 @@ services:
       timeout: 5s
       retries: 5
 
-  # LibreTranslate Service - Disabled (using public API instead)
-  # Note: The local LibreTranslate container was experiencing SSL certificate
-  # verification issues when downloading language models. We now use the public
-  # LibreTranslate API (https://libretranslate.com) instead.
-  #
-  # To re-enable local LibreTranslate, uncomment this service and update the
-  # LIBRETRANSLATE_URL in the backend service to: http://libretranslate:5000
-  #
-  # libretranslate:
-  #   build:
-  #     context: ./libretranslate
-  #     dockerfile: Dockerfile
-  #   container_name: rentrate-libretranslate
-  #   ports:
-  #     - "5001:5000"
-  #   networks:
-  #     - rentrate-network
-  #   restart: unless-stopped
-  #   environment:
-  #     - PYTHONHTTPSVERIFY=1
-  #     - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-  #   volumes:
-  #     - libretranslate_data:/home/libretranslate/.local
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "curl -f http://localhost:5000/languages || exit 1"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 60s
+  # Translation Service - Using Google Translate API
+  # Note: LibreTranslate has been replaced with Google Translate API for better
+  # reliability and translation quality. Configure GOOGLE_TRANSLATE_API_KEY
+  # in your .env file to enable translation features.
 
   # Flask Backend
   backend:
@@ -66,8 +41,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-rentrate}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-rentrate}
       - POSTGRES_DB=${POSTGRES_DB:-rentrate}
-      - LIBRETRANSLATE_URL=${LIBRETRANSLATE_URL:-https://libretranslate.com}
-      - LIBRETRANSLATE_API_KEY=${LIBRETRANSLATE_API_KEY:-}
+      - GOOGLE_TRANSLATE_API_KEY=${GOOGLE_TRANSLATE_API_KEY:-}
     ports:
       - "5000:5000"
     depends_on:
@@ -105,4 +79,3 @@ networks:
 
 volumes:
   postgres_data:
-  # libretranslate_data: # Disabled - no longer needed with public API

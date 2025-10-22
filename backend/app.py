@@ -8,9 +8,9 @@ import jwt
 import re
 from functools import wraps
 import langdetect
-import requests
 from langdetect import detect_langs, LangDetectException
 import traceback
+from google.cloud import translate_v2 as translate
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -419,7 +419,7 @@ def get_property(property_id):
 
 @app.route('/api/translate', methods=['POST'])
 def translate_text():
-    """Translate text from one language to another using LibreTranslate API"""
+    """Translate text from one language to another using Google Translate API"""
     data = request.get_json()
     
     # Validate required fields
@@ -470,40 +470,31 @@ def translate_text():
             'from_cache': True
         }), 200
     
-    # Use LibreTranslate API for translation
-    # Get API URL from environment variable or use default public instance
-    libretranslate_url = os.environ.get('LIBRETRANSLATE_URL', 'https://libretranslate.com')
-    libretranslate_api_key = os.environ.get('LIBRETRANSLATE_API_KEY', '')
+    # Use Google Translate API for translation
+    # Get API key from environment variable
+    google_api_key = os.environ.get('GOOGLE_TRANSLATE_API_KEY', '')
+    
+    if not google_api_key:
+        app.logger.error("GOOGLE_TRANSLATE_API_KEY environment variable is not set")
+        return jsonify({
+            'error': 'Translation service not configured. Please set GOOGLE_TRANSLATE_API_KEY environment variable.'
+        }), 503
     
     try:
-        # Call LibreTranslate API
-        translate_url = f"{libretranslate_url}/translate"
-        payload = {
-            'q': text,
-            'source': source_lang,
-            'target': target_lang,
-            'format': 'text'
-        }
-        
-        if libretranslate_api_key:
-            payload['api_key'] = libretranslate_api_key
+        # Initialize Google Translate client with API key
+        translate_client = translate.Client(api_key=google_api_key)
         
         # Log request details for debugging
-        app.logger.info(f"Translation request - URL: {translate_url}, source: {source_lang}, target: {target_lang}, text length: {len(text)}")
+        app.logger.info(f"Translation request - source: {source_lang}, target: {target_lang}, text length: {len(text)}")
         
-        response = requests.post(translate_url, json=payload, timeout=10)
+        # Call Google Translate API
+        result = translate_client.translate(
+            text,
+            source_language=source_lang,
+            target_language=target_lang,
+            format_='text'
+        )
         
-        if response.status_code != 200:
-            # Log detailed error information
-            app.logger.error(f"Translation API error - Status: {response.status_code}, URL: {translate_url}")
-            app.logger.error(f"Response body: {response.text}")
-            app.logger.error(f"Request payload: {payload}")
-            return jsonify({
-                'error': 'Translation service error',
-                'details': response.text
-            }), 500
-        
-        result = response.json()
         translated_text = result.get('translatedText', '')
         
         if not translated_text:
@@ -529,21 +520,13 @@ def translate_text():
             'from_cache': False
         }), 200
         
-    except requests.exceptions.RequestException as e:
-        # Log detailed error with traceback for debugging
-        app.logger.error(f"Translation service error: {str(e)}")
-        app.logger.error(f"Request URL: {translate_url}")
-        app.logger.error(f"Request payload: {payload}")
-        app.logger.error(f"Full traceback:\n{traceback.format_exc()}")
-        return jsonify({
-            'error': 'Translation service unavailable'
-        }), 503
     except Exception as e:
         # Log detailed error with traceback for debugging
         app.logger.error(f"Translation error: {str(e)}")
         app.logger.error(f"Full traceback:\n{traceback.format_exc()}")
         return jsonify({
-            'error': 'Translation failed'
+            'error': 'Translation service error',
+            'details': str(e)
         }), 500
 
 @app.route('/api/detect-language', methods=['POST'])

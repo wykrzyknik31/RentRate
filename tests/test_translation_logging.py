@@ -28,14 +28,14 @@ def client():
 class TestTranslationLogging:
     """Test suite for enhanced translation logging"""
     
-    @patch('app.requests.post')
-    def test_logs_request_details_on_success(self, mock_post, client, caplog):
+    @patch('app.translate.Client')
+    @patch.dict(os.environ, {'GOOGLE_TRANSLATE_API_KEY': 'test-api-key'})
+    def test_logs_request_details_on_success(self, mock_translate_client, client, caplog):
         """Test that successful translations log request details"""
-        # Mock the LibreTranslate API response
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'translatedText': 'Hola mundo'}
-        mock_post.return_value = mock_response
+        # Mock the Google Translate API response
+        mock_client_instance = Mock()
+        mock_client_instance.translate.return_value = {'translatedText': 'Hola mundo'}
+        mock_translate_client.return_value = mock_client_instance
         
         # Set log level to capture info messages
         with caplog.at_level(logging.INFO):
@@ -54,14 +54,14 @@ class TestTranslationLogging:
         assert any('target: es' in msg for msg in log_messages)
         assert any('Translation successful' in msg for msg in log_messages)
     
-    @patch('app.requests.post')
-    def test_logs_error_details_on_api_failure(self, mock_post, client, caplog):
+    @patch('app.translate.Client')
+    @patch.dict(os.environ, {'GOOGLE_TRANSLATE_API_KEY': 'test-api-key'})
+    def test_logs_error_details_on_api_failure(self, mock_translate_client, client, caplog):
         """Test that API errors log detailed information"""
         # Mock API error
-        mock_response = Mock()
-        mock_response.status_code = 400
-        mock_response.text = 'Bad Request: Invalid language code'
-        mock_post.return_value = mock_response
+        mock_client_instance = Mock()
+        mock_client_instance.translate.side_effect = Exception('Invalid language code')
+        mock_translate_client.return_value = mock_client_instance
         
         # Set log level to capture error messages
         with caplog.at_level(logging.ERROR):
@@ -75,18 +75,17 @@ class TestTranslationLogging:
         
         # Check that error details were logged
         log_messages = [record.message for record in caplog.records]
-        assert any('Translation API error' in msg for msg in log_messages)
-        assert any('Status: 400' in msg for msg in log_messages)
-        assert any('Bad Request' in msg for msg in log_messages)
+        assert any('Translation error' in msg for msg in log_messages)
+        assert any('Invalid language code' in msg for msg in log_messages)
     
-    @patch('app.requests.post')
-    def test_logs_empty_translation_response(self, mock_post, client, caplog):
+    @patch('app.translate.Client')
+    @patch.dict(os.environ, {'GOOGLE_TRANSLATE_API_KEY': 'test-api-key'})
+    def test_logs_empty_translation_response(self, mock_translate_client, client, caplog):
         """Test that empty translation responses are logged"""
         # Mock API response with empty translated text
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'translatedText': ''}
-        mock_post.return_value = mock_response
+        mock_client_instance = Mock()
+        mock_client_instance.translate.return_value = {'translatedText': ''}
+        mock_translate_client.return_value = mock_client_instance
         
         # Set log level to capture error messages
         with caplog.at_level(logging.ERROR):
@@ -102,12 +101,14 @@ class TestTranslationLogging:
         log_messages = [record.message for record in caplog.records]
         assert any('returned empty text' in msg for msg in log_messages)
     
-    @patch('app.requests.post')
-    def test_logs_request_exception_with_traceback(self, mock_post, client, caplog):
-        """Test that request exceptions log traceback"""
-        # Mock network error
-        from requests.exceptions import ConnectionError
-        mock_post.side_effect = ConnectionError('Connection refused')
+    @patch('app.translate.Client')
+    @patch.dict(os.environ, {'GOOGLE_TRANSLATE_API_KEY': 'test-api-key'})
+    def test_logs_api_exception_with_traceback(self, mock_translate_client, client, caplog):
+        """Test that API exceptions log traceback"""
+        # Mock API error
+        mock_client_instance = Mock()
+        mock_client_instance.translate.side_effect = Exception('API connection error')
+        mock_translate_client.return_value = mock_client_instance
         
         # Set log level to capture error messages
         with caplog.at_level(logging.ERROR):
@@ -117,24 +118,20 @@ class TestTranslationLogging:
                 'target_lang': 'es'
             })
         
-        assert response.status_code == 503
+        assert response.status_code == 500
         
         # Check that detailed error was logged
         log_messages = [record.message for record in caplog.records]
-        assert any('Translation service error' in msg for msg in log_messages)
-        assert any('Connection refused' in msg for msg in log_messages)
+        assert any('Translation error' in msg for msg in log_messages)
+        assert any('API connection error' in msg for msg in log_messages)
         assert any('Full traceback' in msg for msg in log_messages)
-        assert any('Request URL' in msg for msg in log_messages)
-        assert any('Request payload' in msg for msg in log_messages)
     
-    @patch('app.requests.post')
-    def test_logs_general_exception_with_traceback(self, mock_post, client, caplog):
+    @patch('app.translate.Client')
+    @patch.dict(os.environ, {'GOOGLE_TRANSLATE_API_KEY': 'test-api-key'})
+    def test_logs_general_exception_with_traceback(self, mock_translate_client, client, caplog):
         """Test that general exceptions log traceback"""
-        # Mock general error
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.side_effect = ValueError('Invalid JSON')
-        mock_post.return_value = mock_response
+        # Mock client creation error
+        mock_translate_client.side_effect = ValueError('Invalid API key format')
         
         # Set log level to capture error messages
         with caplog.at_level(logging.ERROR):
