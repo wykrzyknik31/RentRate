@@ -31,7 +31,15 @@ def get_database_uri():
 def migrate():
     """Add city column to property table if it doesn't exist"""
     database_uri = get_database_uri()
-    print(f"Connecting to database: {database_uri.split('@')[-1] if '@' in database_uri else database_uri}")
+    # Redact password from URI for logging
+    if '@' in database_uri:
+        # Split at @ to get the connection string after authentication
+        db_location = database_uri.split('@')[-1]
+    else:
+        # For SQLite, just show the path without file prefix
+        db_location = database_uri.replace('sqlite:///', '')
+    
+    print(f"Connecting to database: {db_location}")
     
     engine = create_engine(database_uri)
     
@@ -87,13 +95,21 @@ def migrate():
                     conn.commit()
                     print("Added city column to property table (PostgreSQL)")
                 else:
-                    print(f"Unknown database type: {database_uri}")
+                    # Don't log the full URI as it contains credentials
+                    db_type = 'unknown'
+                    if 'postgresql' in database_uri:
+                        db_type = 'postgresql'
+                    elif 'mysql' in database_uri:
+                        db_type = 'mysql'
+                    elif 'sqlite' in database_uri:
+                        db_type = 'sqlite'
+                    print(f"Unknown database type: {db_type}")
                     return
                 
                 print("Migration complete!")
                 
             except (OperationalError, ProgrammingError) as e:
-                print(f"Error during migration: {e}")
+                print(f"Error during migration: {str(e)}")
                 conn.rollback()
                 raise
 
