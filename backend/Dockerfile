@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && \
 # Copy backend code
 COPY . .
 
+# Ensure startup.sh has correct permissions and line endings
+RUN chmod +x startup.sh
+
 # Expose Flask port
 EXPOSE 5000
 
@@ -30,4 +33,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:5000/api/health || exit 1
 
 # Run startup script (includes migration + Flask app)
-CMD ["./startup.sh"]
+CMD ["bash", "startup.sh"]
