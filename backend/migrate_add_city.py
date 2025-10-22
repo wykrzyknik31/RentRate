@@ -8,6 +8,7 @@ Run this script if you have an existing database without the city column:
 
 import os
 import sys
+import time
 from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
@@ -28,6 +29,25 @@ def get_database_uri():
         basedir = os.path.abspath(os.path.dirname(__file__))
         return 'sqlite:///' + os.path.join(basedir, 'rentrate.db')
 
+def wait_for_db(database_uri, max_retries=5, retry_delay=2):
+    """Wait for database to be ready with retry logic"""
+    for attempt in range(max_retries):
+        try:
+            engine = create_engine(database_uri)
+            # Try to connect
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            print("Database connection successful")
+            return engine
+        except OperationalError as e:
+            if attempt < max_retries - 1:
+                print(f"Database not ready (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay}s...")
+                time.sleep(retry_delay)
+                retry_delay *= 2  # Exponential backoff
+            else:
+                print(f"Failed to connect to database after {max_retries} attempts")
+                raise
+
 def migrate():
     """Add city column to property table if it doesn't exist"""
     database_uri = get_database_uri()
@@ -41,7 +61,8 @@ def migrate():
     
     print(f"Connecting to database: {db_location}")
     
-    engine = create_engine(database_uri)
+    # Wait for database to be ready with retry logic
+    engine = wait_for_db(database_uri)
     
     # Check if property table exists
     inspector = inspect(engine)
