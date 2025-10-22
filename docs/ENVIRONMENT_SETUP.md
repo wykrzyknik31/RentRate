@@ -48,42 +48,35 @@ SECRET_KEY=your-secret-key      # Secret key for JWT tokens (MUST change in prod
 
 ```bash
 LIBRETRANSLATE_URL=https://libretranslate.com    # Translation service URL
-LIBRETRANSLATE_API_KEY=                          # Optional API key for higher rate limits
+LIBRETRANSLATE_API_KEY=your-api-key-here         # REQUIRED for public API - get free key at https://portal.libretranslate.com
 ```
 
 #### Translation Service Options
 
-**Option 1: Public LibreTranslate API (Default)**
-```bash
-LIBRETRANSLATE_URL=https://libretranslate.com
-LIBRETRANSLATE_API_KEY=
-```
-- ✅ No setup required
-- ✅ Works immediately
-- ⚠️ Has rate limits
-- ⚠️ Requires internet connection
-
-**Option 2: Public LibreTranslate API with API Key**
+**Option 1: Public LibreTranslate API (Default - API Key Required)**
 ```bash
 LIBRETRANSLATE_URL=https://libretranslate.com
 LIBRETRANSLATE_API_KEY=your_api_key_here
 ```
-- ✅ Higher rate limits
-- ✅ More reliable for production
-- 💰 Free tier available at https://libretranslate.com
+- ✅ Easy to set up - just get a free API key at https://portal.libretranslate.com
+- ✅ Free tier with reasonable rate limits
+- ✅ Maintained by LibreTranslate team
+- ⚠️ **API key is required** (was optional in the past, but is now mandatory)
+- ⚠️ Requires internet connection
 
-**Option 3: Self-Hosted LibreTranslate**
+**Option 2: Self-Hosted LibreTranslate (No API Key Needed)**
 ```bash
 LIBRETRANSLATE_URL=http://libretranslate:5000
 LIBRETRANSLATE_API_KEY=
 ```
+- ✅ No API key required
 - ✅ No rate limits
 - ✅ Works offline
 - ✅ Better privacy
 - ⚠️ Requires uncommenting service in docker-compose.yml
 - ⚠️ Uses more resources (~500MB RAM, ~1GB disk)
 
-**Option 4: Custom Translation Service**
+**Option 3: Custom Translation Service**
 ```bash
 LIBRETRANSLATE_URL=https://your-custom-instance.com
 LIBRETRANSLATE_API_KEY=your_api_key

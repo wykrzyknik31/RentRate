@@ -24,7 +24,7 @@ Following the recommended approach from the issue, the project now uses the **pu
 - **Disabled the libretranslate service**: Commented out the entire service with explanatory notes
 - **Updated backend configuration**:
   - Changed `LIBRETRANSLATE_URL` from `http://libretranslate:5000` to `https://libretranslate.com`
-  - Added `LIBRETRANSLATE_API_KEY` environment variable (empty by default, optional)
+  - Added `LIBRETRANSLATE_API_KEY` environment variable (required for public API - get free key at https://portal.libretranslate.com)
   - Removed the dependency on `libretranslate` service health check
 - **Disabled libretranslate_data volume**: Commented out as it's no longer needed
 
@@ -138,9 +138,9 @@ The translation feature will use the public API by default with no additional co
 
 ## Configuration Options
 
-### Using an API Key (Optional)
+### Using an API Key (Required for Public API)
 
-To increase rate limits, you can get a free API key from LibreTranslate:
+The public LibreTranslate API now requires an API key. Get a free API key from https://portal.libretranslate.com:
 
 1. Create a `.env` file if you haven't already:
    ```bash

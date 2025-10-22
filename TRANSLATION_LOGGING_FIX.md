@@ -158,7 +158,7 @@ Expected result: All tests pass ✅
 No configuration changes required. The enhanced logging works with existing environment variables:
 
 - `LIBRETRANSLATE_URL`: Translation API URL (default: https://libretranslate.com)
-- `LIBRETRANSLATE_API_KEY`: Optional API key for higher rate limits
+- `LIBRETRANSLATE_API_KEY`: Required API key for public API (get free key at https://portal.libretranslate.com)
 
 ## Security Considerations
 
