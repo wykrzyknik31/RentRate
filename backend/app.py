@@ -10,6 +10,7 @@ from functools import wraps
 import langdetect
 import requests
 from langdetect import detect_langs, LangDetectException
+import traceback
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -487,9 +488,16 @@ def translate_text():
         if libretranslate_api_key:
             payload['api_key'] = libretranslate_api_key
         
+        # Log request details for debugging
+        app.logger.info(f"Translation request - URL: {translate_url}, source: {source_lang}, target: {target_lang}, text length: {len(text)}")
+        
         response = requests.post(translate_url, json=payload, timeout=10)
         
         if response.status_code != 200:
+            # Log detailed error information
+            app.logger.error(f"Translation API error - Status: {response.status_code}, URL: {translate_url}")
+            app.logger.error(f"Response body: {response.text}")
+            app.logger.error(f"Request payload: {payload}")
             return jsonify({
                 'error': 'Translation service error',
                 'details': response.text
@@ -499,6 +507,7 @@ def translate_text():
         translated_text = result.get('translatedText', '')
         
         if not translated_text:
+            app.logger.error(f"Translation API returned empty text - Response: {result}")
             return jsonify({'error': 'Translation failed'}), 500
         
         # Cache the translation
@@ -511,6 +520,8 @@ def translate_text():
         db.session.add(new_translation)
         db.session.commit()
         
+        app.logger.info(f"Translation successful - source: {source_lang}, target: {target_lang}")
+        
         return jsonify({
             'translated_text': translated_text,
             'source_lang': source_lang,
@@ -519,14 +530,18 @@ def translate_text():
         }), 200
         
     except requests.exceptions.RequestException as e:
-        # Log the error for debugging but don't expose details to user
+        # Log detailed error with traceback for debugging
         app.logger.error(f"Translation service error: {str(e)}")
+        app.logger.error(f"Request URL: {translate_url}")
+        app.logger.error(f"Request payload: {payload}")
+        app.logger.error(f"Full traceback:\n{traceback.format_exc()}")
         return jsonify({
             'error': 'Translation service unavailable'
         }), 503
     except Exception as e:
-        # Log the error for debugging but don't expose details to user
+        # Log detailed error with traceback for debugging
         app.logger.error(f"Translation error: {str(e)}")
+        app.logger.error(f"Full traceback:\n{traceback.format_exc()}")
         return jsonify({
             'error': 'Translation failed'
         }), 500
