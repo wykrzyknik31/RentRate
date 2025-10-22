@@ -82,14 +82,14 @@ class TestTranslateEndpoint:
         assert data['source_lang'] == 'en'
         assert data['target_lang'] == 'en'
     
-    @patch('app.requests.post')
-    def test_translate_with_api_success(self, mock_post, client):
+    @patch('app.translate.Client')
+    @patch.dict('os.environ', {'GOOGLE_TRANSLATE_API_KEY': 'test-api-key'})
+    def test_translate_with_api_success(self, mock_translate_client, client):
         """Test successful translation via API"""
-        # Mock the LibreTranslate API response
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'translatedText': 'Hola mundo'}
-        mock_post.return_value = mock_response
+        # Mock the Google Translate API response
+        mock_client_instance = Mock()
+        mock_client_instance.translate.return_value = {'translatedText': 'Hola mundo'}
+        mock_translate_client.return_value = mock_client_instance
         
         response = client.post('/api/translate', json={
             'text': 'Hello world',
@@ -104,14 +104,14 @@ class TestTranslateEndpoint:
         assert data['target_lang'] == 'es'
         assert data['from_cache'] is False
     
-    @patch('app.requests.post')
-    def test_translate_caching(self, mock_post, client):
+    @patch('app.translate.Client')
+    @patch.dict('os.environ', {'GOOGLE_TRANSLATE_API_KEY': 'test-api-key'})
+    def test_translate_caching(self, mock_translate_client, client):
         """Test that translations are cached"""
-        # Mock the LibreTranslate API response
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {'translatedText': 'Hola mundo'}
-        mock_post.return_value = mock_response
+        # Mock the Google Translate API response
+        mock_client_instance = Mock()
+        mock_client_instance.translate.return_value = {'translatedText': 'Hola mundo'}
+        mock_translate_client.return_value = mock_client_instance
         
         # First request - should call API
         response1 = client.post('/api/translate', json={
@@ -135,16 +135,16 @@ class TestTranslateEndpoint:
         assert data2['translated_text'] == 'Hola mundo'
         
         # API should only be called once
-        assert mock_post.call_count == 1
+        assert mock_client_instance.translate.call_count == 1
     
-    @patch('app.requests.post')
-    def test_translate_api_error(self, mock_post, client):
+    @patch('app.translate.Client')
+    @patch.dict('os.environ', {'GOOGLE_TRANSLATE_API_KEY': 'test-api-key'})
+    def test_translate_api_error(self, mock_translate_client, client):
         """Test handling of API errors"""
         # Mock API error
-        mock_response = Mock()
-        mock_response.status_code = 500
-        mock_response.text = 'Internal Server Error'
-        mock_post.return_value = mock_response
+        mock_client_instance = Mock()
+        mock_client_instance.translate.side_effect = Exception('API Error')
+        mock_translate_client.return_value = mock_client_instance
         
         response = client.post('/api/translate', json={
             'text': 'Hello world',
@@ -155,3 +155,16 @@ class TestTranslateEndpoint:
         assert response.status_code == 500
         data = response.get_json()
         assert 'error' in data
+    
+    def test_translate_missing_api_key(self, client):
+        """Test handling when API key is not configured"""
+        response = client.post('/api/translate', json={
+            'text': 'Hello world',
+            'source_lang': 'en',
+            'target_lang': 'es'
+        })
+        
+        assert response.status_code == 503
+        data = response.get_json()
+        assert 'error' in data
+        assert 'not configured' in data['error'].lower()

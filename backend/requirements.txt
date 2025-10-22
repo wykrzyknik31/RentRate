@@ -5,3 +5,4 @@ Flask-Bcrypt==1.0.1
 PyJWT==2.8.0
 langdetect==1.0.9
 requests==2.31.0
+google-cloud-translate==3.12.1

@@ -76,7 +76,7 @@ make up-build
    - **Frontend**: http://localhost:3000
    - **Backend API**: http://localhost:5000
    - **Database**: localhost:5432 (PostgreSQL)
-   - **Translation Service**: Public LibreTranslate API (https://libretranslate.com)
+   - **Translation Service**: Google Translate API (requires API key)
 
 4. Stop the services:
 ```bash
@@ -130,12 +130,19 @@ The application can be configured using a `.env` file. All settings have sensibl
    SECRET_KEY=your-secret-key
    
    # Translation Service
-   LIBRETRANSLATE_URL=https://libretranslate.com
-   LIBRETRANSLATE_API_KEY=  # Optional, for higher rate limits
+   GOOGLE_TRANSLATE_API_KEY=your-google-api-key
    
    # Frontend
    NEXT_PUBLIC_API_URL=http://localhost:5000
    ```
+
+   **Getting a Google Translate API Key:**
+   1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+   2. Create a new project or select an existing one
+   3. Enable the "Cloud Translation API" for your project
+   4. Go to "APIs & Services" > "Credentials"
+   5. Click "Create Credentials" > "API Key"
+   6. Copy the API key and add it to your `.env` file
 
 3. Restart services to apply changes:
    ```bash
@@ -157,7 +164,7 @@ The Docker setup includes three services:
 2. **Flask Backend** (port 5000)
    - Python 3.11 slim image
    - Automatically connects to PostgreSQL
-   - Uses public LibreTranslate API for translations
+   - Uses Google Translate API for translations
    - Hot-reload enabled in development
 
 3. **Next.js Frontend** (port 3000)
@@ -165,7 +172,7 @@ The Docker setup includes three services:
    - Connected to backend API
    - Hot-reload enabled in development
 
-**Translation Service**: Uses the public LibreTranslate API (https://libretranslate.com) by default. No additional setup required. See [TRANSLATION_SETUP.md](TRANSLATION_SETUP.md) for alternative configurations.
+**Translation Service**: Uses Google Translate API for reliable, high-quality translations. Requires a Google Cloud API key (see configuration section above).
 
 ### Local Development Setup (Without Docker)
 
@@ -221,12 +228,13 @@ The application will be available at `http://localhost:3000`
 
 ### Troubleshooting
 
-**Issue: LibreTranslate container fails with SSL certificate errors**
+**Issue: Translation feature not working**
 
-If you see SSL certificate verification errors when starting LibreTranslate:
-- The custom Dockerfile includes fixes for common SSL certificate issues
-- For corporate networks with custom CA certificates, see [SSL Troubleshooting Guide](docs/SSL_TROUBLESHOOTING.md)
-- For detailed instructions, see [LibreTranslate README](libretranslate/README.md)
+If translations are not working:
+- Make sure you have set the `GOOGLE_TRANSLATE_API_KEY` environment variable in your `.env` file
+- Verify the API key is valid and the Cloud Translation API is enabled for your Google Cloud project
+- Check the backend logs for any error messages: `docker compose logs backend`
+- Translation errors will show "błąd tłumaczenia" (translation error) in the UI
 
 **Issue: 'next' is not recognized as an internal or external command (Windows)**
 
