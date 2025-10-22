@@ -61,21 +61,25 @@ You should see a JSON response:
 
 ### Reviews
 - `GET /api/reviews` - Get all reviews (optional query param: `property_id`)
-- `POST /api/reviews` - Create a new review
+- `POST /api/reviews` - Create a new review (supports JSON and multipart/form-data with photos)
 - `GET /api/reviews/<id>` - Get a specific review
 
 ### Properties
 - `GET /api/properties` - Get all properties with review stats
 - `GET /api/properties/<id>` - Get a specific property with all reviews
 
+### Photos
+- `GET /api/photos/<id>` - Get a photo by ID (returns image file)
+
 ## Request Examples
 
-### Create a Review
+### Create a Review (JSON)
 ```bash
 curl -X POST http://localhost:5000/api/reviews \
   -H "Content-Type: application/json" \
   -d '{
     "address": "123 Main St, Apt 4B",
+    "city": "New York",
     "property_type": "apartment",
     "reviewer_name": "John Doe",
     "rating": 4,
@@ -84,6 +88,24 @@ curl -X POST http://localhost:5000/api/reviews \
     "landlord_rating": 5
   }'
 ```
+
+### Create a Review with Photos (Multipart Form)
+```bash
+curl -X POST http://localhost:5000/api/reviews \
+  -F "address=123 Main St, Apt 4B" \
+  -F "city=New York" \
+  -F "property_type=apartment" \
+  -F "reviewer_name=John Doe" \
+  -F "rating=4" \
+  -F "review_text=Great apartment, spacious and clean!" \
+  -F "photos=@photo1.jpg" \
+  -F "photos=@photo2.jpg"
+```
+
+**Photo Upload Limits:**
+- Maximum 5 photos per review
+- Supported formats: JPG, JPEG, PNG
+- Maximum file size: 5MB per photo
 
 ### Get All Reviews
 ```bash

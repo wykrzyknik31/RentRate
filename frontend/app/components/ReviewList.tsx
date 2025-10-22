@@ -6,7 +6,16 @@ import { useTranslation } from "react-i18next";
 interface Property {
   id: number;
   address: string;
+  city?: string;
   property_type: string;
+  created_at: string;
+}
+
+interface Photo {
+  id: number;
+  review_id: number;
+  filename: string;
+  url: string;
   created_at: string;
 }
 
@@ -19,6 +28,7 @@ interface Review {
   review_text: string;
   landlord_name: string | null;
   landlord_rating: number | null;
+  photos: Photo[];
   created_at: string;
 }
 
@@ -243,6 +253,11 @@ export default function ReviewList() {
               <h3 className="text-xl font-semibold text-gray-800">
                 {review.property.address}
               </h3>
+              {review.property.city && (
+                <p className="text-sm text-gray-600 mt-1">
+                  {t("reviewList.city")}: {review.property.city}
+                </p>
+              )}
               <span className="inline-block bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded mt-2">
                 {review.property.property_type}
               </span>
@@ -252,6 +267,23 @@ export default function ReviewList() {
               {renderStars(review.rating)}
             </div>
           </div>
+
+          {/* Photos */}
+          {review.photos && review.photos.length > 0 && (
+            <div className="mb-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                {review.photos.map((photo) => (
+                  <img
+                    key={photo.id}
+                    src={`${API_URL}${photo.url}`}
+                    alt={photo.filename}
+                    className="w-full h-24 object-cover rounded-lg border border-gray-200 hover:opacity-90 transition-opacity cursor-pointer"
+                    onClick={() => window.open(`${API_URL}${photo.url}`, '_blank')}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mb-4">
             <p className="text-gray-700 leading-relaxed">

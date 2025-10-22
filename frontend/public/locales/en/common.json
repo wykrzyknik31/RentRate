@@ -27,7 +27,8 @@
     "showOriginal": "Show original",
     "translating": "Translating...",
     "translationError": "Translation failed",
-    "translated": "Translated from {{language}}"
+    "translated": "Translated from {{language}}",
+    "city": "City"
   },
   "addReview": {
     "title": "Add a new review",
@@ -36,6 +37,8 @@
     "error": "Error: {{message}}",
     "propertyAddress": "Property Address *",
     "propertyAddressPlaceholder": "e.g., 123 Main St, Apt 4B",
+    "city": "City/Town",
+    "cityPlaceholder": "e.g., New York, London, Warsaw",
     "propertyType": "Property Type *",
     "propertyTypeRoom": "Room",
     "propertyTypeApartment": "Apartment",
@@ -45,6 +48,10 @@
     "propertyRating": "Property Rating *",
     "yourReview": "Your Review",
     "yourReviewPlaceholder": "Share your experience with this property...",
+    "photos": "Photos (Optional)",
+    "photosHint": "Upload up to 5 photos (JPG, PNG, max 5MB each)",
+    "addPhotos": "Add Photos",
+    "removePhoto": "Remove",
     "landlordInfo": "Landlord Information (Optional)",
     "landlordName": "Landlord Name",
     "landlordNamePlaceholder": "Jane Smith",
@@ -52,7 +59,9 @@
     "submitReview": "Submit Review",
     "submitting": "Submitting...",
     "cancel": "Cancel",
-    "backendError": "Unable to connect to the backend server. Please make sure the backend is running on {{url}}. See the README for setup instructions."
+    "backendError": "Unable to connect to the backend server. Please make sure the backend is running on {{url}}. See the README for setup instructions.",
+    "photoError": "Invalid file type or size. Only JPG/PNG files up to 5MB are allowed.",
+    "maxPhotosError": "Maximum 5 photos allowed."
   },
   "login": {
     "title": "Log In",
