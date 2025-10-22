@@ -1,12 +1,16 @@
+# Environment variables can be customized in a .env file
+# Copy .env.example to .env and modify as needed
+# If no .env file exists, default values will be used
+
 services:
   # PostgreSQL Database
   db:
     image: postgres:15-alpine
     container_name: rentrate-db
     environment:
-      POSTGRES_USER: rentrate
-      POSTGRES_PASSWORD: rentrate
-      POSTGRES_DB: rentrate
+      POSTGRES_USER: ${POSTGRES_USER:-rentrate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rentrate}
+      POSTGRES_DB: ${POSTGRES_DB:-rentrate}
     ports:
       - "5432:5432"
     volumes:
@@ -56,14 +60,14 @@ services:
       dockerfile: Dockerfile
     container_name: rentrate-backend
     environment:
-      - FLASK_ENV=development
-      - SECRET_KEY=dev-secret-key-change-in-production
+      - FLASK_ENV=${FLASK_ENV:-development}
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
       - DB_HOST=db
-      - POSTGRES_USER=rentrate
-      - POSTGRES_PASSWORD=rentrate
-      - POSTGRES_DB=rentrate
-      - LIBRETRANSLATE_URL=https://libretranslate.com
-      - LIBRETRANSLATE_API_KEY=
+      - POSTGRES_USER=${POSTGRES_USER:-rentrate}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-rentrate}
+      - POSTGRES_DB=${POSTGRES_DB:-rentrate}
+      - LIBRETRANSLATE_URL=${LIBRETRANSLATE_URL:-https://libretranslate.com}
+      - LIBRETRANSLATE_API_KEY=${LIBRETRANSLATE_API_KEY:-}
     ports:
       - "5000:5000"
     depends_on:
@@ -82,7 +86,7 @@ services:
       dockerfile: Dockerfile
     container_name: rentrate-frontend
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:5000
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000}
     ports:
       - "3000:3000"
     depends_on:
