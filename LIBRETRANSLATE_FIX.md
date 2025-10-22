@@ -44,6 +44,18 @@ Following the recommended approach from the issue, the project now uses the **pu
 - Added check for whether libretranslate service is running
 - Prevents confusing errors when trying to view logs for non-existent service
 
+#### 5. .env.example
+- Created `.env.example` file with all configurable environment variables
+- Added translation service configuration with sensible defaults
+- Documented the purpose of each variable with comments
+- Made it easy to customize the translation service URL and API key
+
+#### 6. Environment Variable Pattern
+- Updated `docker-compose.yml` to use variable substitution (`${VAR:-default}`)
+- Supports customization via `.env` file while providing safe defaults
+- Users can now easily switch between public API, self-hosted, or custom instances
+- No need to edit `docker-compose.yml` directly for configuration changes
+
 ### Benefits
 
 ✅ **No SSL Certificate Issues**: Public API doesn't require downloading models on startup  
@@ -78,12 +90,24 @@ The tests confirm:
 ## Deployment
 
 ### For New Users
-Simply run:
-```bash
-docker compose up --build
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/wykrzyknik31/RentRate.git
+   cd RentRate
+   ```
 
-The translation feature will use the public API by default.
+2. (Optional) Create a `.env` file for custom configuration:
+   ```bash
+   cp .env.example .env
+   # Edit .env if you want to customize settings
+   ```
+
+3. Start the services:
+   ```bash
+   docker compose up --build
+   ```
+
+The translation feature will use the public API by default with no additional configuration needed.
 
 ### For Existing Users
 1. Pull the latest changes:
@@ -96,12 +120,18 @@ The translation feature will use the public API by default.
    docker compose down
    ```
 
-3. Remove the old libretranslate volume (optional, to free space):
+3. (Optional) Remove the old libretranslate volume to free space:
    ```bash
    docker volume rm rentrate_libretranslate_data
    ```
 
-4. Start the updated services:
+4. (Optional) Create a `.env` file if you want to customize configuration:
+   ```bash
+   cp .env.example .env
+   # Edit .env if needed
+   ```
+
+5. Start the updated services:
    ```bash
    docker compose up --build
    ```
@@ -110,11 +140,23 @@ The translation feature will use the public API by default.
 
 ### Using an API Key (Optional)
 
-To increase rate limits, you can get a free API key from LibreTranslate and add it to docker-compose.yml:
+To increase rate limits, you can get a free API key from LibreTranslate:
 
-```yaml
-- LIBRETRANSLATE_API_KEY=your_api_key_here
-```
+1. Create a `.env` file if you haven't already:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and add your API key:
+   ```bash
+   LIBRETRANSLATE_API_KEY=your_api_key_here
+   ```
+
+3. Restart the services:
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
 
 ### Re-enabling Local LibreTranslate
 
@@ -122,23 +164,48 @@ If you prefer to self-host (e.g., for privacy, offline usage, or avoiding rate l
 
 1. Uncomment the `libretranslate` service in `docker-compose.yml`
 2. Uncomment the `libretranslate_data` volume
-3. Change backend environment: `LIBRETRANSLATE_URL=http://libretranslate:5000`
-4. Add backend dependency back:
+3. Create or edit `.env` file:
+   ```bash
+   cp .env.example .env
+   ```
+4. Update the translation URL in `.env`:
+   ```bash
+   LIBRETRANSLATE_URL=http://libretranslate:5000
+   ```
+5. Add backend dependency back in `docker-compose.yml`:
    ```yaml
    depends_on:
      libretranslate:
        condition: service_healthy
    ```
-5. Rebuild: `docker compose up --build`
+6. Rebuild: `docker compose up --build`
 
 ⚠️ **Note**: You may still encounter SSL certificate issues with local hosting. See TRANSLATION_SETUP.md for troubleshooting.
 
 ### Using Alternative Services
 
-The backend supports any LibreTranslate-compatible API. You can:
-- Use a different LibreTranslate instance
-- Use Google Translate, DeepL, or other services (requires code changes)
-- Host LibreTranslate on a separate server
+The backend supports any LibreTranslate-compatible API. To use a different service:
+
+1. Create or edit `.env` file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Update the URL in `.env`:
+   ```bash
+   LIBRETRANSLATE_URL=https://your-instance.com
+   LIBRETRANSLATE_API_KEY=your_api_key_if_needed
+   ```
+
+3. Restart the services:
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
+
+You can also:
+- Use Google Translate, DeepL, or other services (requires code changes to backend)
+- Host LibreTranslate on a separate server and point to it
 
 ## Verification
 

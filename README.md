@@ -51,7 +51,18 @@ git clone https://github.com/wykrzyknik31/RentRate.git
 cd RentRate
 ```
 
-2. Build and start all services:
+2. (Optional) Configure environment variables:
+```bash
+cp .env.example .env
+# Edit .env if you want to customize settings
+```
+   The application works out-of-the-box with default settings. Create a `.env` file only if you need to customize:
+   - Database credentials
+   - Translation service URL or API key
+   - Secret keys for production
+   - Frontend API URL
+
+3. Build and start all services:
 ```bash
 docker compose up --build
 ```
@@ -61,7 +72,7 @@ Or use the Makefile:
 make up-build
 ```
 
-3. Access the application:
+4. Access the application:
    - **Frontend**: http://localhost:3000
    - **Backend API**: http://localhost:5000
    - **Database**: localhost:5432 (PostgreSQL)
@@ -96,30 +107,65 @@ The project includes a Makefile with convenient commands:
 - `make shell-frontend` - Open shell in frontend container
 - `make shell-db` - Open PostgreSQL shell
 
+#### Environment Configuration
+
+The application can be configured using a `.env` file. All settings have sensible defaults, so creating a `.env` file is optional.
+
+**To customize configuration:**
+
+1. Copy the example file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` with your preferred settings:
+   ```bash
+   # Database
+   POSTGRES_USER=rentrate
+   POSTGRES_PASSWORD=rentrate
+   POSTGRES_DB=rentrate
+   
+   # Backend
+   FLASK_ENV=development
+   SECRET_KEY=your-secret-key
+   
+   # Translation Service
+   LIBRETRANSLATE_URL=https://libretranslate.com
+   LIBRETRANSLATE_API_KEY=  # Optional, for higher rate limits
+   
+   # Frontend
+   NEXT_PUBLIC_API_URL=http://localhost:5000
+   ```
+
+3. Restart services to apply changes:
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
+
+**Note:** The `.env` file is in `.gitignore` to prevent committing sensitive credentials.
+
 #### Docker Architecture
 
-The Docker setup includes four services:
+The Docker setup includes three services:
 
 1. **PostgreSQL Database** (port 5432)
    - Official PostgreSQL 15 Alpine image
    - Data persisted in Docker volume
    - Healthcheck enabled
 
-2. **LibreTranslate** (port 5001)
-   - Official LibreTranslate image for translation service
-   - Provides automatic translation for reviews
-   - No API key required (self-hosted)
-   - Healthcheck enabled
-
-3. **Flask Backend** (port 5000)
+2. **Flask Backend** (port 5000)
    - Python 3.11 slim image
-   - Automatically connects to PostgreSQL and LibreTranslate
+   - Automatically connects to PostgreSQL
+   - Uses public LibreTranslate API for translations
    - Hot-reload enabled in development
 
-4. **Next.js Frontend** (port 3000)
+3. **Next.js Frontend** (port 3000)
    - Node 18 Alpine image
    - Connected to backend API
    - Hot-reload enabled in development
+
+**Translation Service**: Uses the public LibreTranslate API (https://libretranslate.com) by default. No additional setup required. See [TRANSLATION_SETUP.md](TRANSLATION_SETUP.md) for alternative configurations.
 
 ### Local Development Setup (Without Docker)
 
