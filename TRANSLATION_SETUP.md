@@ -39,7 +39,7 @@ Add these environment variables to configure the translation service:
 # LibreTranslate API URL (default: public instance)
 LIBRETRANSLATE_URL=https://libretranslate.com
 
-# API Key (optional, required for some instances)
+# API Key (REQUIRED for public API - get free key at https://portal.libretranslate.com)
 LIBRETRANSLATE_API_KEY=your_api_key_here
 ```
 
@@ -52,18 +52,22 @@ was experiencing SSL certificate verification issues when downloading language m
 The default `docker-compose.yml` now configures:
 - Uses the public LibreTranslate API at `https://libretranslate.com`
 - Automatically configured with `LIBRETRANSLATE_URL=https://libretranslate.com`
-- No API key required (optional for higher limits)
+- **API key is REQUIRED** - get a free API key at https://portal.libretranslate.com
 - No local LibreTranslate container to manage
 - Simpler deployment and maintenance
 
-To start all services:
+**Getting Started**:
+
+1. Get a free API key from https://portal.libretranslate.com
+2. Create a `.env` file and add: `LIBRETRANSLATE_API_KEY=your-api-key-here`
+3. Start all services:
 ```bash
 docker-compose up -d
 ```
 
 Note about the public instance:
-- The public instance has rate limits (can be increased with an API key)
-- No API key is required for basic usage
+- The public instance requires an API key for authentication
+- Free tier is available with reasonable rate limits
 - Service availability is generally good
 - Network restrictions may prevent access in some environments
 

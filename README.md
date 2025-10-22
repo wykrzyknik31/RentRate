@@ -77,8 +77,10 @@ make up-build
    - **Backend API**: http://localhost:5000
    - **Database**: localhost:5432 (PostgreSQL)
    - **Translation Service**: Public LibreTranslate API (https://libretranslate.com)
+   
+   **Important**: Translation feature requires a LibreTranslate API key. Get a free API key at https://portal.libretranslate.com and set it in your `.env` file as `LIBRETRANSLATE_API_KEY=your-api-key-here`.
 
-4. Stop the services:
+6. Stop the services:
 ```bash
 docker compose down
 ```
@@ -131,7 +133,7 @@ The application can be configured using a `.env` file. All settings have sensibl
    
    # Translation Service
    LIBRETRANSLATE_URL=https://libretranslate.com
-   LIBRETRANSLATE_API_KEY=  # Optional, for higher rate limits
+   LIBRETRANSLATE_API_KEY=your-api-key-here  # Required for public API. Get one at: https://portal.libretranslate.com
    
    # Frontend
    NEXT_PUBLIC_API_URL=http://localhost:5000
@@ -165,7 +167,7 @@ The Docker setup includes three services:
    - Connected to backend API
    - Hot-reload enabled in development
 
-**Translation Service**: Uses the public LibreTranslate API (https://libretranslate.com) by default. No additional setup required. See [TRANSLATION_SETUP.md](TRANSLATION_SETUP.md) for alternative configurations.
+**Translation Service**: Uses the public LibreTranslate API (https://libretranslate.com) by default. **An API key is required** - get a free key at https://portal.libretranslate.com and configure it via the `LIBRETRANSLATE_API_KEY` environment variable. See [TRANSLATION_SETUP.md](TRANSLATION_SETUP.md) for details and alternative configurations.
 
 ### Local Development Setup (Without Docker)
 

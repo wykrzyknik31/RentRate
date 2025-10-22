@@ -28,8 +28,13 @@ services:
   # verification issues when downloading language models. We now use the public
   # LibreTranslate API (https://libretranslate.com) instead.
   #
-  # To re-enable local LibreTranslate, uncomment this service and update the
-  # LIBRETRANSLATE_URL in the backend service to: http://libretranslate:5000
+  # IMPORTANT: The public API requires an API key. Get a free key at:
+  # https://portal.libretranslate.com and set it in .env as LIBRETRANSLATE_API_KEY
+  #
+  # To re-enable local LibreTranslate (no API key needed for self-hosted):
+  # 1. Uncomment this service
+  # 2. Update LIBRETRANSLATE_URL in backend service to: http://libretranslate:5000
+  # 3. Remove or leave LIBRETRANSLATE_API_KEY empty
   #
   # libretranslate:
   #   build:
