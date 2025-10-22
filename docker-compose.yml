@@ -21,18 +21,33 @@ services:
 
   # LibreTranslate Service
   libretranslate:
-    image: libretranslate/libretranslate:latest
+    build:
+      context: ./libretranslate
+      dockerfile: Dockerfile
     container_name: rentrate-libretranslate
     ports:
       - "5001:5000"
     networks:
       - rentrate-network
     restart: unless-stopped
+    environment:
+      # SSL/TLS Configuration
+      - PYTHONHTTPSVERIFY=1
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      # Optional: Set to 0 to disable SSL verification (not recommended for production)
+      # - PYTHONHTTPSVERIFY=0
+    volumes:
+      # Mount custom CA certificates if needed (e.g., for corporate proxies)
+      # Uncomment and add your custom CA certificate files to ./certs/
+      # - ./certs:/usr/local/share/ca-certificates/custom:ro
+      # LibreTranslate data for model persistence
+      - libretranslate_data:/home/libretranslate/.local
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/languages || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
 
   # Flask Backend
   backend:
@@ -87,3 +102,4 @@ networks:
 
 volumes:
   postgres_data:
+  libretranslate_data:
