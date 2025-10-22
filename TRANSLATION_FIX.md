@@ -175,9 +175,10 @@ To use a different LibreTranslate instance:
 3. Verify backend can reach LibreTranslate: `docker-compose logs backend | grep -i translate`
 
 ### LibreTranslate Service Won't Start
-1. Check port 5001 is not in use: `lsof -i :5001`
-2. Check Docker has enough resources (memory/CPU)
-3. Try pulling image manually: `docker pull libretranslate/libretranslate:latest`
+1. **SSL Certificate Errors**: If you see SSL verification errors, the custom Dockerfile includes fixes. For corporate proxies, see `libretranslate/README.md`
+2. Check port 5001 is not in use: `lsof -i :5001`
+3. Check Docker has enough resources (memory/CPU)
+4. Check logs for errors: `docker compose logs libretranslate`
 
 ### Translations Are Incorrect
 This is expected with the self-hosted instance, which uses open-source models. For better quality:

@@ -210,6 +210,25 @@ When using external translation APIs:
 - Try self-hosting LibreTranslate
 - Check API key if required
 
+### LibreTranslate Container Fails to Start (SSL Certificate Error)
+If you see SSL certificate verification errors in the logs:
+```
+URLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED]'))
+IndexError: list index out of range
+```
+
+**Solution**: The custom LibreTranslate Dockerfile already addresses this issue by:
+- Installing and updating CA certificates
+- Configuring SSL environment variables
+- Supporting custom CA certificates for corporate proxies
+
+**For corporate networks with custom CA certificates**:
+1. Create a `certs` directory and add your CA certificate files
+2. Uncomment the volume mount in `docker-compose.yml`
+3. Rebuild: `docker compose up --build`
+
+See `libretranslate/README.md` for detailed instructions.
+
 ### Slow Translation Performance
 - Consider self-hosting for better performance
 - Ensure database indexes are created
