@@ -3,9 +3,9 @@
 import { useTranslation } from "react-i18next";
 
 const languages = [
-  { code: "pl", name: "Polski", flag: "🇵🇱" },
-  { code: "en", name: "English", flag: "🇬🇧" },
-  { code: "ru", name: "Русский", flag: "🇷🇺" },
+  { code: "pl", name: "Polski", flag: "PL" },
+  { code: "en", name: "English", flag: "EN" },
+  { code: "ru", name: "Русский", flag: "RU" },
 ];
 
 export default function LanguageSwitcher() {
@@ -28,7 +28,7 @@ export default function LanguageSwitcher() {
           }`}
           title={lang.name}
         >
-          <span className="text-lg">{lang.flag}</span>
+          <span className="font-semibold text-sm">{lang.flag}</span>
         </button>
       ))}
     </div>

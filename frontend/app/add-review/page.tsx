@@ -13,6 +13,7 @@ export default function AddReview() {
   const { t } = useTranslation("common");
   const [formData, setFormData] = useState({
     address: "",
+    city: "",
     property_type: "apartment",
     reviewer_name: "",
     rating: 3,
@@ -20,6 +21,8 @@ export default function AddReview() {
     landlord_name: "",
     landlord_rating: 3,
   });
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,20 +32,32 @@ export default function AddReview() {
     setError(null);
 
     try {
-      const reviewData = {
-        ...formData,
-        landlord_name: formData.landlord_name || undefined,
-        landlord_rating: formData.landlord_name
-          ? formData.landlord_rating
-          : undefined,
-      };
+      const formDataToSend = new FormData();
+      
+      // Add form fields
+      formDataToSend.append("address", formData.address);
+      if (formData.city) {
+        formDataToSend.append("city", formData.city);
+      }
+      formDataToSend.append("property_type", formData.property_type);
+      formDataToSend.append("reviewer_name", formData.reviewer_name);
+      formDataToSend.append("rating", formData.rating.toString());
+      if (formData.review_text) {
+        formDataToSend.append("review_text", formData.review_text);
+      }
+      if (formData.landlord_name) {
+        formDataToSend.append("landlord_name", formData.landlord_name);
+        formDataToSend.append("landlord_rating", formData.landlord_rating.toString());
+      }
+      
+      // Add photos
+      photos.forEach((photo) => {
+        formDataToSend.append("photos", photo);
+      });
 
       const response = await fetch(`${API_URL}/api/reviews`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(reviewData),
+        body: formDataToSend,
       });
 
       if (!response.ok) {
@@ -77,6 +92,52 @@ export default function AddReview() {
       [name]:
         type === "number" || name.includes("rating") ? parseInt(value) : value,
     }));
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    // Validate number of photos
+    if (photos.length + files.length > 5) {
+      setError(t("addReview.maxPhotosError"));
+      return;
+    }
+    
+    // Validate file types and sizes
+    const validFiles: File[] = [];
+    for (const file of files) {
+      const isValidType = ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type);
+      const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+      
+      if (!isValidType || !isValidSize) {
+        setError(t("addReview.photoError"));
+        continue;
+      }
+      validFiles.push(file);
+    }
+    
+    if (validFiles.length > 0) {
+      setPhotos((prev) => [...prev, ...validFiles]);
+      
+      // Create preview URLs
+      validFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPhotoPreviewUrls((prev) => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      setError(null);
+    }
+    
+    // Reset input
+    e.target.value = '';
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotoPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
   const renderStarSelector = (fieldName: "rating" | "landlord_rating") => {
@@ -173,6 +234,24 @@ export default function AddReview() {
 
             <div>
               <label
+                htmlFor="city"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                {t("addReview.city")}
+              </label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder={t("addReview.cityPlaceholder")}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label
                 htmlFor="property_type"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
@@ -237,6 +316,63 @@ export default function AddReview() {
                 placeholder={t("addReview.yourReviewPlaceholder")}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+            </div>
+
+            {/* Photos */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("addReview.photos")}
+              </label>
+              <p className="text-sm text-gray-500 mb-3">
+                {t("addReview.photosHint")}
+              </p>
+              
+              {photoPreviewUrls.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                  {photoPreviewUrls.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={url}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(index)}
+                        className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        {t("addReview.removePhoto")}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {photos.length < 5 && (
+                <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  {t("addReview.addPhotos")}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png"
+                    multiple
+                    onChange={handlePhotoChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
 
             {/* Landlord Information (Optional) */}

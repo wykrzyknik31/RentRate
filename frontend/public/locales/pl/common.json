@@ -27,7 +27,8 @@
     "showOriginal": "Pokaż oryginał",
     "translating": "Tłumaczenie...",
     "translationError": "Błąd tłumaczenia",
-    "translated": "Przetłumaczone z {{language}}"
+    "translated": "Przetłumaczone z {{language}}",
+    "city": "Miasto"
   },
   "addReview": {
     "title": "Dodaj nową opinię",
@@ -36,6 +37,8 @@
     "error": "Błąd: {{message}}",
     "propertyAddress": "Adres nieruchomości *",
     "propertyAddressPlaceholder": "np. ul. Główna 123, Mieszkanie 4B",
+    "city": "Miasto",
+    "cityPlaceholder": "np. Warszawa, Kraków, Gdańsk",
     "propertyType": "Typ nieruchomości *",
     "propertyTypeRoom": "Pokój",
     "propertyTypeApartment": "Mieszkanie",
@@ -45,6 +48,10 @@
     "propertyRating": "Ocena nieruchomości *",
     "yourReview": "Twoja opinia",
     "yourReviewPlaceholder": "Podziel się swoim doświadczeniem z tą nieruchomością...",
+    "photos": "Zdjęcia (opcjonalnie)",
+    "photosHint": "Dodaj do 5 zdjęć (JPG, PNG, maks. 5MB każde)",
+    "addPhotos": "Dodaj zdjęcia",
+    "removePhoto": "Usuń",
     "landlordInfo": "Informacje o właścicielu (opcjonalnie)",
     "landlordName": "Imię właściciela",
     "landlordNamePlaceholder": "Anna Nowak",
@@ -52,7 +59,9 @@
     "submitReview": "Prześlij opinię",
     "submitting": "Przesyłanie...",
     "cancel": "Anuluj",
-    "backendError": "Nie można połączyć się z serwerem backend. Upewnij się, że backend działa na {{url}}. Zobacz README po instrukcje konfiguracji."
+    "backendError": "Nie można połączyć się z serwerem backend. Upewnij się, że backend działa na {{url}}. Zobacz README po instrukcje konfiguracji.",
+    "photoError": "Nieprawidłowy typ lub rozmiar pliku. Dozwolone są tylko pliki JPG/PNG do 5MB.",
+    "maxPhotosError": "Maksymalnie 5 zdjęć."
   },
   "login": {
     "title": "Zaloguj się",

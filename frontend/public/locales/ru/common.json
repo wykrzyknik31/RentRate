@@ -27,7 +27,8 @@
     "showOriginal": "Показать оригинал",
     "translating": "Перевод...",
     "translationError": "Ошибка перевода",
-    "translated": "Переведено с {{language}}"
+    "translated": "Переведено с {{language}}",
+    "city": "Город"
   },
   "addReview": {
     "title": "Добавить новый отзыв",
@@ -36,6 +37,8 @@
     "error": "Ошибка: {{message}}",
     "propertyAddress": "Адрес недвижимости *",
     "propertyAddressPlaceholder": "например, ул. Главная 123, кв. 4Б",
+    "city": "Город",
+    "cityPlaceholder": "например, Москва, Санкт-Петербург, Варшава",
     "propertyType": "Тип недвижимости *",
     "propertyTypeRoom": "Комната",
     "propertyTypeApartment": "Квартира",
@@ -45,6 +48,10 @@
     "propertyRating": "Рейтинг недвижимости *",
     "yourReview": "Ваш отзыв",
     "yourReviewPlaceholder": "Поделитесь своим опытом об этой недвижимости...",
+    "photos": "Фотографии (необязательно)",
+    "photosHint": "Загрузите до 5 фотографий (JPG, PNG, макс. 5МБ каждая)",
+    "addPhotos": "Добавить фотографии",
+    "removePhoto": "Удалить",
     "landlordInfo": "Информация о владельце (необязательно)",
     "landlordName": "Имя владельца",
     "landlordNamePlaceholder": "Анна Смирнова",
@@ -52,7 +59,9 @@
     "submitReview": "Отправить отзыв",
     "submitting": "Отправка...",
     "cancel": "Отмена",
-    "backendError": "Не удается подключиться к серверу бэкенда. Убедитесь, что бэкенд работает на {{url}}. Смотрите README для инструкций по настройке."
+    "backendError": "Не удается подключиться к серверу бэкенда. Убедитесь, что бэкенд работает на {{url}}. Смотрите README для инструкций по настройке.",
+    "photoError": "Неверный тип или размер файла. Разрешены только файлы JPG/PNG до 5МБ.",
+    "maxPhotosError": "Максимум 5 фотографий."
   },
   "login": {
     "title": "Войти",

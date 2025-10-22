@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, send_file
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -11,6 +11,8 @@ import langdetect
 from langdetect import detect_langs, LangDetectException
 import traceback
 from google.cloud import translate_v2 as translate
+from werkzeug.utils import secure_filename
+import uuid
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -38,12 +40,25 @@ app.config['ENV'] = os.environ.get('FLASK_ENV', 'development')
 # Security configuration
 IS_PRODUCTION = app.config['ENV'] == 'production'
 
+# File upload configuration
+UPLOAD_FOLDER = os.path.join(basedir, 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_PHOTOS = 5
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
+# Create upload directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 db = SQLAlchemy(app)
 
 # Models
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(200), nullable=False)
+    city = db.Column(db.String(100))
     property_type = db.Column(db.String(50), nullable=False)  # room, apartment, house
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     reviews = db.relationship('Review', backref='property', lazy=True)
@@ -52,6 +67,7 @@ class Property(db.Model):
         return {
             'id': self.id,
             'address': self.address,
+            'city': self.city,
             'property_type': self.property_type,
             'created_at': self.created_at.isoformat()
         }
@@ -65,6 +81,7 @@ class Review(db.Model):
     landlord_name = db.Column(db.String(100))
     landlord_rating = db.Column(db.Integer)  # 1-5 stars
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    photos = db.relationship('Photo', backref='review', lazy=True, cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
@@ -76,6 +93,23 @@ class Review(db.Model):
             'review_text': self.review_text,
             'landlord_name': self.landlord_name,
             'landlord_rating': self.landlord_rating,
+            'photos': [photo.to_dict() for photo in self.photos],
+            'created_at': self.created_at.isoformat()
+        }
+
+class Photo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    review_id = db.Column(db.Integer, db.ForeignKey('review.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    filepath = db.Column(db.String(500), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'review_id': self.review_id,
+            'filename': self.filename,
+            'url': f'/api/photos/{self.id}',
             'created_at': self.created_at.isoformat()
         }
 
@@ -180,6 +214,11 @@ def token_required(f):
         return f(current_user, *args, **kwargs)
     
     return decorated
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # API Routes
 @app.route('/', methods=['GET'])
@@ -332,7 +371,23 @@ def get_reviews():
 @app.route('/api/reviews', methods=['POST'])
 def create_review():
     """Create a new review"""
-    data = request.get_json()
+    # Check if request has files
+    if request.content_type and 'multipart/form-data' in request.content_type:
+        # Handle multipart form data with files
+        data = {}
+        for key in request.form:
+            try:
+                # Try to parse JSON values
+                import json
+                data[key] = json.loads(request.form[key])
+            except:
+                data[key] = request.form[key]
+        
+        files = request.files.getlist('photos')
+    else:
+        # Handle JSON data without files
+        data = request.get_json()
+        files = []
     
     # Validate required fields (reviewer_name is optional and defaults to "Anonymous")
     required_fields = ['address', 'property_type', 'rating']
@@ -347,14 +402,28 @@ def create_review():
     if data.get('landlord_rating') and (not isinstance(data['landlord_rating'], int) or data['landlord_rating'] < 1 or data['landlord_rating'] > 5):
         return jsonify({'error': 'Landlord rating must be an integer between 1 and 5'}), 400
     
+    # Validate photos
+    if len(files) > MAX_PHOTOS:
+        return jsonify({'error': f'Maximum {MAX_PHOTOS} photos allowed'}), 400
+    
+    for file in files:
+        if file and file.filename:
+            if not allowed_file(file.filename):
+                return jsonify({'error': f'Invalid file type. Only JPG, JPEG, and PNG files are allowed'}), 400
+    
     # Check if property exists or create new one
     property = Property.query.filter_by(address=data['address']).first()
     if not property:
         property = Property(
             address=data['address'],
+            city=data.get('city'),
             property_type=data['property_type']
         )
         db.session.add(property)
+        db.session.commit()
+    elif data.get('city') and not property.city:
+        # Update city if provided and not already set
+        property.city = data['city']
         db.session.commit()
     
     # Create review (use "Anonymous" if reviewer_name is not provided)
@@ -368,6 +437,28 @@ def create_review():
     )
     
     db.session.add(review)
+    db.session.commit()
+    
+    # Handle photo uploads
+    for file in files:
+        if file and file.filename:
+            # Generate unique filename
+            original_filename = secure_filename(file.filename)
+            ext = original_filename.rsplit('.', 1)[1].lower()
+            unique_filename = f"{uuid.uuid4()}.{ext}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            
+            # Save file
+            file.save(filepath)
+            
+            # Create photo record
+            photo = Photo(
+                review_id=review.id,
+                filename=original_filename,
+                filepath=filepath
+            )
+            db.session.add(photo)
+    
     db.session.commit()
     
     return jsonify(review.to_dict()), 201
@@ -416,6 +507,18 @@ def get_property(property_id):
         prop_dict['average_rating'] = 0
     
     return jsonify(prop_dict), 200
+
+@app.route('/api/photos/<int:photo_id>', methods=['GET'])
+def get_photo(photo_id):
+    """Get a photo by ID"""
+    photo = Photo.query.get(photo_id)
+    if not photo:
+        return jsonify({'error': 'Photo not found'}), 404
+    
+    if not os.path.exists(photo.filepath):
+        return jsonify({'error': 'Photo file not found'}), 404
+    
+    return send_file(photo.filepath, mimetype='image/jpeg')
 
 @app.route('/api/translate', methods=['POST'])
 def translate_text():
