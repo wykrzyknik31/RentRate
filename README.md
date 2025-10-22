@@ -175,6 +175,13 @@ The application will be available at `http://localhost:3000`
 
 ### Troubleshooting
 
+**Issue: LibreTranslate container fails with SSL certificate errors**
+
+If you see SSL certificate verification errors when starting LibreTranslate:
+- The custom Dockerfile includes fixes for common SSL certificate issues
+- For corporate networks with custom CA certificates, see [SSL Troubleshooting Guide](docs/SSL_TROUBLESHOOTING.md)
+- For detailed instructions, see [LibreTranslate README](libretranslate/README.md)
+
 **Issue: 'next' is not recognized as an internal or external command (Windows)**
 
 If you get this error when running `npm run dev`, it means you haven't installed the dependencies yet:
