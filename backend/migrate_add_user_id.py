@@ -51,10 +51,13 @@ def wait_for_db(database_uri, max_retries=5, retry_delay=2):
 def migrate():
     """Add ON DELETE CASCADE to user_id foreign key and create index"""
     database_uri = get_database_uri()
-    # Redact password from URI for logging
+    
+    # Redact credentials from URI for secure logging
     if '@' in database_uri:
+        # Extract only the host/database part after the @ symbol (excludes username:password)
         db_location = database_uri.split('@')[-1]
     else:
+        # For SQLite, just show the database filename
         db_location = database_uri.replace('sqlite:///', '')
     
     print(f"Connecting to database: {db_location}")
