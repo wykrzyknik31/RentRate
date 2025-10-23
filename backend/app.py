@@ -358,13 +358,42 @@ def logout():
 
 @app.route('/api/reviews', methods=['GET'])
 def get_reviews():
-    """Get all reviews or filter by property_id"""
-    property_id = request.args.get('property_id', type=int)
+    """Get all reviews with optional filtering and sorting
     
+    Query parameters:
+    - property_id: Filter by property ID
+    - city: Filter by city name
+    - rating: Filter by minimum rating (e.g., 4 returns reviews with rating >= 4)
+    - sort: Sort order (recent, rating_desc, rating_asc)
+    """
+    property_id = request.args.get('property_id', type=int)
+    city = request.args.get('city', type=str)
+    min_rating = request.args.get('rating', type=int)
+    sort_by = request.args.get('sort', type=str, default='recent')
+    
+    # Start with base query
+    query = Review.query
+    
+    # Apply filters
     if property_id:
-        reviews = Review.query.filter_by(property_id=property_id).order_by(Review.created_at.desc()).all()
-    else:
-        reviews = Review.query.order_by(Review.created_at.desc()).all()
+        query = query.filter_by(property_id=property_id)
+    
+    if city:
+        # Join with Property table to filter by city
+        query = query.join(Property).filter(Property.city == city)
+    
+    if min_rating:
+        query = query.filter(Review.rating >= min_rating)
+    
+    # Apply sorting
+    if sort_by == 'rating_desc':
+        query = query.order_by(Review.rating.desc(), Review.created_at.desc())
+    elif sort_by == 'rating_asc':
+        query = query.order_by(Review.rating.asc(), Review.created_at.desc())
+    else:  # 'recent' or default
+        query = query.order_by(Review.created_at.desc())
+    
+    reviews = query.all()
     
     return jsonify([review.to_dict() for review in reviews]), 200
 
@@ -470,6 +499,12 @@ def get_review(review_id):
     if not review:
         return jsonify({'error': 'Review not found'}), 404
     return jsonify(review.to_dict()), 200
+
+@app.route('/api/cities', methods=['GET'])
+def get_cities():
+    """Get list of unique cities from properties"""
+    cities = db.session.query(Property.city).distinct().filter(Property.city.isnot(None)).order_by(Property.city).all()
+    return jsonify([city[0] for city in cities]), 200
 
 @app.route('/api/properties', methods=['GET'])
 def get_properties():
