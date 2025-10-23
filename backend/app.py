@@ -75,6 +75,7 @@ class Property(db.Model):
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     property_id = db.Column(db.Integer, db.ForeignKey('property.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Optional: links review to user if authenticated
     reviewer_name = db.Column(db.String(100), nullable=False)
     rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
     review_text = db.Column(db.Text)  # Optional comment
@@ -82,6 +83,7 @@ class Review(db.Model):
     landlord_rating = db.Column(db.Integer)  # 1-5 stars
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     photos = db.relationship('Photo', backref='review', lazy=True, cascade='all, delete-orphan')
+    user = db.relationship('User', backref='reviews', lazy=True)
 
     def to_dict(self):
         return {
@@ -400,6 +402,23 @@ def get_reviews():
 @app.route('/api/reviews', methods=['POST'])
 def create_review():
     """Create a new review"""
+    # Check for authenticated user (optional - reviews can be created anonymously)
+    current_user = None
+    token = None
+    if 'token' in request.cookies:
+        token = request.cookies.get('token')
+    elif 'Authorization' in request.headers:
+        auth_header = request.headers.get('Authorization')
+        if auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+    
+    if token:
+        try:
+            payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = User.query.get(payload['user_id'])
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            pass  # Continue with anonymous review
+    
     # Check if request has files
     if request.content_type and 'multipart/form-data' in request.content_type:
         # Handle multipart form data with files
@@ -458,6 +477,7 @@ def create_review():
     # Create review (use "Anonymous" if reviewer_name is not provided)
     review = Review(
         property_id=property.id,
+        user_id=current_user.id if current_user else None,
         reviewer_name=data.get('reviewer_name', 'Anonymous') or 'Anonymous',
         rating=data['rating'],
         review_text=data.get('review_text'),
@@ -499,6 +519,70 @@ def get_review(review_id):
     if not review:
         return jsonify({'error': 'Review not found'}), 404
     return jsonify(review.to_dict()), 200
+
+@app.route('/api/my-reviews', methods=['GET'])
+@token_required
+def get_my_reviews(current_user):
+    """Get all reviews created by the authenticated user"""
+    reviews = Review.query.filter_by(user_id=current_user.id).order_by(Review.created_at.desc()).all()
+    return jsonify([review.to_dict() for review in reviews]), 200
+
+@app.route('/api/reviews/<int:review_id>', methods=['PUT'])
+@token_required
+def update_review(current_user, review_id):
+    """Update a review (only if owned by the authenticated user)"""
+    review = Review.query.get(review_id)
+    if not review:
+        return jsonify({'error': 'Review not found'}), 404
+    
+    # Check ownership
+    if review.user_id != current_user.id:
+        return jsonify({'error': 'You can only edit your own reviews'}), 403
+    
+    data = request.get_json()
+    
+    # Validate rating if provided
+    if 'rating' in data:
+        if not isinstance(data['rating'], int) or data['rating'] < 1 or data['rating'] > 5:
+            return jsonify({'error': 'Rating must be an integer between 1 and 5'}), 400
+        review.rating = data['rating']
+    
+    # Validate landlord_rating if provided
+    if 'landlord_rating' in data and data['landlord_rating'] is not None:
+        if not isinstance(data['landlord_rating'], int) or data['landlord_rating'] < 1 or data['landlord_rating'] > 5:
+            return jsonify({'error': 'Landlord rating must be an integer between 1 and 5'}), 400
+        review.landlord_rating = data['landlord_rating']
+    
+    # Update other fields
+    if 'review_text' in data:
+        review.review_text = data['review_text']
+    if 'landlord_name' in data:
+        review.landlord_name = data['landlord_name']
+    
+    # Update property city if provided
+    if 'city' in data and data['city']:
+        property = Property.query.get(review.property_id)
+        if property:
+            property.city = data['city']
+    
+    db.session.commit()
+    return jsonify(review.to_dict()), 200
+
+@app.route('/api/reviews/<int:review_id>', methods=['DELETE'])
+@token_required
+def delete_review(current_user, review_id):
+    """Delete a review (only if owned by the authenticated user)"""
+    review = Review.query.get(review_id)
+    if not review:
+        return jsonify({'error': 'Review not found'}), 404
+    
+    # Check ownership
+    if review.user_id != current_user.id:
+        return jsonify({'error': 'You can only delete your own reviews'}), 403
+    
+    db.session.delete(review)
+    db.session.commit()
+    return jsonify({'message': 'Review deleted successfully'}), 200
 
 @app.route('/api/cities', methods=['GET'])
 def get_cities():

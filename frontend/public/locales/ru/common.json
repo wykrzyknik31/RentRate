@@ -120,5 +120,32 @@
   "language": {
     "name": "Русский",
     "code": "RU"
+  },
+  "myReviews": {
+    "title": "Мои Отзывы",
+    "noReviews": "Вы еще не добавили ни одного отзыва.",
+    "addFirstReview": "Добавить Первый Отзыв",
+    "loading": "Загрузка ваших отзывов...",
+    "error": "Ошибка загрузки отзывов: {{message}}",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "confirmDelete": "Вы уверены, что хотите удалить этот отзыв?",
+    "deleteSuccess": "Отзыв успешно удален",
+    "deleteError": "Не удалось удалить отзыв",
+    "editReview": "Редактировать Отзыв",
+    "updateReview": "Обновить Отзыв",
+    "updating": "Обновление...",
+    "cancel": "Отмена",
+    "updateSuccess": "Отзыв успешно обновлен",
+    "updateError": "Не удалось обновить отзыв",
+    "propertyAddress": "Адрес Недвижимости",
+    "city": "Город",
+    "propertyType": "Тип Недвижимости",
+    "yourRating": "Ваша Оценка",
+    "yourReview": "Ваш Отзыв",
+    "landlordName": "Имя Арендодателя",
+    "landlordRating": "Оценка Арендодателя",
+    "reviewedOn": "Отзыв оставлен {{date}}",
+    "backToList": "Вернуться к Моим Отзывам"
   }
 }

@@ -68,6 +68,12 @@ export default function Navbar() {
               <div className="text-blue-100">{t("nav.loading")}</div>
             ) : user ? (
               <>
+                <Link
+                  href="/my-reviews"
+                  className="text-white hover:text-blue-100 transition-colors"
+                >
+                  {t("myReviews.title")}
+                </Link>
                 <span className="text-white">
                   {t("nav.welcome", { name: user.username || user.email })}
                 </span>
