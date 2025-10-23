@@ -83,3 +83,4 @@ backend/uploads/
 # Testing
 .turbo
 .vercel
+*.db

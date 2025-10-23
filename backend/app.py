@@ -54,6 +54,18 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db = SQLAlchemy(app)
 
+# Enable foreign key constraints for SQLite
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_conn, connection_record):
+    """Enable foreign key constraints for SQLite"""
+    if 'sqlite' in str(dbapi_conn):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
 # Models
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -75,7 +87,7 @@ class Property(db.Model):
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     property_id = db.Column(db.Integer, db.ForeignKey('property.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Optional: links review to user if authenticated
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=True)  # Optional: links review to user if authenticated
     reviewer_name = db.Column(db.String(100), nullable=False)
     rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
     review_text = db.Column(db.Text)  # Optional comment
@@ -84,6 +96,11 @@ class Review(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     photos = db.relationship('Photo', backref='review', lazy=True, cascade='all, delete-orphan')
     user = db.relationship('User', backref='reviews', lazy=True)
+    
+    # Create index for faster filtering by user_id
+    __table_args__ = (
+        db.Index('idx_review_user_id', 'user_id'),
+    )
 
     def to_dict(self):
         return {
