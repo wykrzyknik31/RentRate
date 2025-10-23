@@ -28,7 +28,19 @@
     "translating": "Translating...",
     "translationError": "Translation failed",
     "translated": "Translated from {{language}}",
-    "city": "City"
+    "city": "City",
+    "filterByCity": "Filter by City",
+    "allCities": "All Cities",
+    "filterByRating": "Minimum Rating",
+    "allRatings": "All Ratings",
+    "rating5Plus": "5 stars",
+    "rating4Plus": "4+ stars",
+    "rating3Plus": "3+ stars",
+    "sortBy": "Sort By",
+    "sortRecent": "Most Recent",
+    "sortHighestRating": "Highest Rating",
+    "sortLowestRating": "Lowest Rating",
+    "clearFilters": "Clear all filters"
   },
   "addReview": {
     "title": "Add a new review",

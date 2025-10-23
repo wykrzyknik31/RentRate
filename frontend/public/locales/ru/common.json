@@ -28,7 +28,19 @@
     "translating": "Перевод...",
     "translationError": "Ошибка перевода",
     "translated": "Переведено с {{language}}",
-    "city": "Город"
+    "city": "Город",
+    "filterByCity": "Фильтр по городу",
+    "allCities": "Все города",
+    "filterByRating": "Минимальный рейтинг",
+    "allRatings": "Все рейтинги",
+    "rating5Plus": "5 звезд",
+    "rating4Plus": "4+ звезды",
+    "rating3Plus": "3+ звезды",
+    "sortBy": "Сортировать по",
+    "sortRecent": "Самые новые",
+    "sortHighestRating": "Самый высокий рейтинг",
+    "sortLowestRating": "Самый низкий рейтинг",
+    "clearFilters": "Очистить все фильтры"
   },
   "addReview": {
     "title": "Добавить новый отзыв",
