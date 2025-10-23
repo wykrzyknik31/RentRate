@@ -191,6 +191,19 @@ Expected: Backend detects the change and reloads
 
 ### Troubleshooting
 
+#### Issue: Backend exits with "exec ./startup.sh: no such file or directory"
+**Solution**: This issue has been fixed by:
+- Adding `.gitattributes` file to ensure shell scripts always use LF (Unix) line endings
+- Updating the Dockerfile to explicitly set execute permissions on startup.sh
+- Using `bash startup.sh` instead of `./startup.sh` for better portability
+
+If you cloned the repository before this fix, run:
+```bash
+git pull
+docker compose build --no-cache backend
+docker compose up
+```
+
 #### Issue: Backend can't connect to database
 **Solution**: Check that DB_HOST environment variable is set correctly in docker-compose.yml
 
