@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && \
 # Copy backend code
 COPY . .
 
-# Ensure startup.sh has correct permissions and line endings
+# Make startup script executable
 RUN chmod +x startup.sh
 
 # Expose Flask port
