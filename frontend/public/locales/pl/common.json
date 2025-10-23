@@ -28,7 +28,19 @@
     "translating": "Tłumaczenie...",
     "translationError": "Błąd tłumaczenia",
     "translated": "Przetłumaczone z {{language}}",
-    "city": "Miasto"
+    "city": "Miasto",
+    "filterByCity": "Filtruj według miasta",
+    "allCities": "Wszystkie miasta",
+    "filterByRating": "Minimalna ocena",
+    "allRatings": "Wszystkie oceny",
+    "rating5Plus": "5 gwiazdek",
+    "rating4Plus": "4+ gwiazdki",
+    "rating3Plus": "3+ gwiazdki",
+    "sortBy": "Sortuj według",
+    "sortRecent": "Najnowsze",
+    "sortHighestRating": "Najwyższa ocena",
+    "sortLowestRating": "Najniższa ocena",
+    "clearFilters": "Wyczyść wszystkie filtry"
   },
   "addReview": {
     "title": "Dodaj nową opinię",

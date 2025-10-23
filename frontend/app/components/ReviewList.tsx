@@ -66,10 +66,20 @@ export default function ReviewList() {
   const [error, setError] = useState<string | null>(null);
   const [translations, setTranslations] = useState<TranslationState>({});
   const [detectedLanguages, setDetectedLanguages] = useState<{ [reviewId: number]: string }>({});
+  
+  // Filter and sort states
+  const [cities, setCities] = useState<string[]>([]);
+  const [selectedCity, setSelectedCity] = useState<string>("");
+  const [selectedRating, setSelectedRating] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("recent");
+
+  useEffect(() => {
+    fetchCities();
+  }, []);
 
   useEffect(() => {
     fetchReviews();
-  }, []);
+  }, [selectedCity, selectedRating, sortBy]);
 
   useEffect(() => {
     // Detect languages for all reviews when they load
@@ -80,10 +90,32 @@ export default function ReviewList() {
     });
   }, [reviews]);
 
+  const fetchCities = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/cities`);
+      if (response.ok) {
+        const data = await response.json();
+        setCities(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch cities:", err);
+    }
+  };
+
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/reviews`);
+      
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (selectedCity) params.append("city", selectedCity);
+      if (selectedRating) params.append("rating", selectedRating);
+      if (sortBy) params.append("sort", sortBy);
+      
+      const queryString = params.toString();
+      const url = `${API_URL}/api/reviews${queryString ? `?${queryString}` : ""}`;
+      
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch reviews");
       }
@@ -243,6 +275,83 @@ export default function ReviewList() {
 
   return (
     <div className="space-y-6">
+      {/* Filter and Sort Controls */}
+      <div className="bg-white rounded-lg shadow-md p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* City Filter */}
+          <div>
+            <label htmlFor="city-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              {t("reviewList.filterByCity")}
+            </label>
+            <select
+              id="city-filter"
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">{t("reviewList.allCities")}</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Rating Filter */}
+          <div>
+            <label htmlFor="rating-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              {t("reviewList.filterByRating")}
+            </label>
+            <select
+              id="rating-filter"
+              value={selectedRating}
+              onChange={(e) => setSelectedRating(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">{t("reviewList.allRatings")}</option>
+              <option value="5">{t("reviewList.rating5Plus")}</option>
+              <option value="4">{t("reviewList.rating4Plus")}</option>
+              <option value="3">{t("reviewList.rating3Plus")}</option>
+            </select>
+          </div>
+
+          {/* Sort By */}
+          <div>
+            <label htmlFor="sort-by" className="block text-sm font-medium text-gray-700 mb-2">
+              {t("reviewList.sortBy")}
+            </label>
+            <select
+              id="sort-by"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="recent">{t("reviewList.sortRecent")}</option>
+              <option value="rating_desc">{t("reviewList.sortHighestRating")}</option>
+              <option value="rating_asc">{t("reviewList.sortLowestRating")}</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Clear Filters Button */}
+        {(selectedCity || selectedRating || sortBy !== "recent") && (
+          <div className="mt-4">
+            <button
+              onClick={() => {
+                setSelectedCity("");
+                setSelectedRating("");
+                setSortBy("recent");
+              }}
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              {t("reviewList.clearFilters")}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Reviews */}
       {reviews.map((review) => (
         <div
           key={review.id}

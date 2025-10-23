@@ -303,3 +303,253 @@ class TestReviewsEndpoint:
         assert 'property' in data[0]
         assert 'city' in data[0]['property']
         assert data[0]['property']['city'] == 'Los Angeles'
+
+
+class TestReviewsFiltering:
+    """Test suite for reviews filtering"""
+    
+    def test_filter_reviews_by_city(self, client):
+        """Test filtering reviews by city"""
+        # Create reviews in different cities
+        client.post('/api/reviews', json={
+            'address': '123 Warsaw Street',
+            'city': 'Warsaw',
+            'property_type': 'apartment',
+            'rating': 5
+        })
+        client.post('/api/reviews', json={
+            'address': '456 Krakow Avenue',
+            'city': 'Krakow',
+            'property_type': 'house',
+            'rating': 4
+        })
+        
+        # Filter by Warsaw
+        response = client.get('/api/reviews?city=Warsaw')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 1
+        assert data[0]['property']['city'] == 'Warsaw'
+    
+    def test_filter_reviews_by_rating(self, client):
+        """Test filtering reviews by minimum rating"""
+        # Create reviews with different ratings
+        client.post('/api/reviews', json={
+            'address': '123 Test Street',
+            'city': 'Test City',
+            'property_type': 'apartment',
+            'rating': 5
+        })
+        client.post('/api/reviews', json={
+            'address': '456 Test Avenue',
+            'city': 'Test City',
+            'property_type': 'house',
+            'rating': 3
+        })
+        client.post('/api/reviews', json={
+            'address': '789 Test Road',
+            'city': 'Test City',
+            'property_type': 'room',
+            'rating': 4
+        })
+        
+        # Filter by rating >= 4
+        response = client.get('/api/reviews?rating=4')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 2
+        for review in data:
+            assert review['rating'] >= 4
+    
+    def test_filter_reviews_by_city_and_rating(self, client):
+        """Test filtering reviews by both city and rating"""
+        # Create reviews
+        client.post('/api/reviews', json={
+            'address': '123 Warsaw Street',
+            'city': 'Warsaw',
+            'property_type': 'apartment',
+            'rating': 5
+        })
+        client.post('/api/reviews', json={
+            'address': '456 Warsaw Avenue',
+            'city': 'Warsaw',
+            'property_type': 'house',
+            'rating': 3
+        })
+        client.post('/api/reviews', json={
+            'address': '789 Krakow Road',
+            'city': 'Krakow',
+            'property_type': 'room',
+            'rating': 5
+        })
+        
+        # Filter by Warsaw and rating >= 4
+        response = client.get('/api/reviews?city=Warsaw&rating=4')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 1
+        assert data[0]['property']['city'] == 'Warsaw'
+        assert data[0]['rating'] >= 4
+
+
+class TestReviewsSorting:
+    """Test suite for reviews sorting"""
+    
+    def test_sort_reviews_by_recent(self, client):
+        """Test sorting reviews by most recent (default)"""
+        # Create reviews with different timestamps
+        import time
+        
+        client.post('/api/reviews', json={
+            'address': '123 First Street',
+            'city': 'Test City',
+            'property_type': 'apartment',
+            'rating': 3
+        })
+        time.sleep(0.1)
+        
+        client.post('/api/reviews', json={
+            'address': '456 Second Avenue',
+            'city': 'Test City',
+            'property_type': 'house',
+            'rating': 5
+        })
+        time.sleep(0.1)
+        
+        client.post('/api/reviews', json={
+            'address': '789 Third Road',
+            'city': 'Test City',
+            'property_type': 'room',
+            'rating': 4
+        })
+        
+        # Get reviews sorted by recent (default)
+        response = client.get('/api/reviews?sort=recent')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 3
+        assert data[0]['property']['address'] == '789 Third Road'
+        assert data[1]['property']['address'] == '456 Second Avenue'
+        assert data[2]['property']['address'] == '123 First Street'
+    
+    def test_sort_reviews_by_rating_desc(self, client):
+        """Test sorting reviews by highest rating"""
+        # Create reviews with different ratings
+        client.post('/api/reviews', json={
+            'address': '123 Test Street',
+            'city': 'Test City',
+            'property_type': 'apartment',
+            'rating': 3
+        })
+        client.post('/api/reviews', json={
+            'address': '456 Test Avenue',
+            'city': 'Test City',
+            'property_type': 'house',
+            'rating': 5
+        })
+        client.post('/api/reviews', json={
+            'address': '789 Test Road',
+            'city': 'Test City',
+            'property_type': 'room',
+            'rating': 4
+        })
+        
+        # Sort by rating descending
+        response = client.get('/api/reviews?sort=rating_desc')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 3
+        assert data[0]['rating'] == 5
+        assert data[1]['rating'] == 4
+        assert data[2]['rating'] == 3
+    
+    def test_sort_reviews_by_rating_asc(self, client):
+        """Test sorting reviews by lowest rating"""
+        # Create reviews with different ratings
+        client.post('/api/reviews', json={
+            'address': '123 Test Street',
+            'city': 'Test City',
+            'property_type': 'apartment',
+            'rating': 3
+        })
+        client.post('/api/reviews', json={
+            'address': '456 Test Avenue',
+            'city': 'Test City',
+            'property_type': 'house',
+            'rating': 5
+        })
+        client.post('/api/reviews', json={
+            'address': '789 Test Road',
+            'city': 'Test City',
+            'property_type': 'room',
+            'rating': 4
+        })
+        
+        # Sort by rating ascending
+        response = client.get('/api/reviews?sort=rating_asc')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 3
+        assert data[0]['rating'] == 3
+        assert data[1]['rating'] == 4
+        assert data[2]['rating'] == 5
+
+
+class TestCitiesEndpoint:
+    """Test suite for cities endpoint"""
+    
+    def test_get_cities_returns_unique_cities(self, client):
+        """Test GET /api/cities returns unique cities"""
+        # Create reviews in different cities
+        client.post('/api/reviews', json={
+            'address': '123 Warsaw Street',
+            'city': 'Warsaw',
+            'property_type': 'apartment',
+            'rating': 5
+        })
+        client.post('/api/reviews', json={
+            'address': '456 Krakow Avenue',
+            'city': 'Krakow',
+            'property_type': 'house',
+            'rating': 4
+        })
+        client.post('/api/reviews', json={
+            'address': '789 Warsaw Road',
+            'city': 'Warsaw',
+            'property_type': 'room',
+            'rating': 3
+        })
+        
+        response = client.get('/api/cities')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 2
+        assert 'Warsaw' in data
+        assert 'Krakow' in data
+    
+    def test_get_cities_sorted_alphabetically(self, client):
+        """Test GET /api/cities returns cities sorted alphabetically"""
+        # Create reviews in different cities
+        client.post('/api/reviews', json={
+            'address': '123 Warsaw Street',
+            'city': 'Warsaw',
+            'property_type': 'apartment',
+            'rating': 5
+        })
+        client.post('/api/reviews', json={
+            'address': '456 Berlin Avenue',
+            'city': 'Berlin',
+            'property_type': 'house',
+            'rating': 4
+        })
+        client.post('/api/reviews', json={
+            'address': '789 Krakow Road',
+            'city': 'Krakow',
+            'property_type': 'room',
+            'rating': 3
+        })
+        
+        response = client.get('/api/cities')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data == ['Berlin', 'Krakow', 'Warsaw']
