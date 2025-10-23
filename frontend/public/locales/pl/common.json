@@ -120,5 +120,32 @@
   "language": {
     "name": "Polski",
     "code": "PL"
+  },
+  "myReviews": {
+    "title": "Moje Recenzje",
+    "noReviews": "Nie dodałeś jeszcze żadnych recenzji.",
+    "addFirstReview": "Dodaj Pierwszą Recenzję",
+    "loading": "Ładowanie twoich recenzji...",
+    "error": "Błąd ładowania recenzji: {{message}}",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "confirmDelete": "Czy na pewno chcesz usunąć tę recenzję?",
+    "deleteSuccess": "Recenzja została pomyślnie usunięta",
+    "deleteError": "Nie udało się usunąć recenzji",
+    "editReview": "Edytuj Recenzję",
+    "updateReview": "Zaktualizuj Recenzję",
+    "updating": "Aktualizowanie...",
+    "cancel": "Anuluj",
+    "updateSuccess": "Recenzja została pomyślnie zaktualizowana",
+    "updateError": "Nie udało się zaktualizować recenzji",
+    "propertyAddress": "Adres Nieruchomości",
+    "city": "Miasto",
+    "propertyType": "Typ Nieruchomości",
+    "yourRating": "Twoja Ocena",
+    "yourReview": "Twoja Recenzja",
+    "landlordName": "Imię Wynajmującego",
+    "landlordRating": "Ocena Wynajmującego",
+    "reviewedOn": "Zrecenzowano {{date}}",
+    "backToList": "Powrót do Moich Recenzji"
   }
 }
