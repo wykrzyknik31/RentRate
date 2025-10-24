@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, make_response, send_file
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
 from datetime import datetime, timedelta
 import os
 import jwt
@@ -53,6 +54,7 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Enable foreign key constraints for SQLite
 from sqlalchemy import event
@@ -172,8 +174,10 @@ class Translation(db.Model):
         }
 
 # Initialize database
-with app.app_context():
-    db.create_all()
+# Note: Database initialization is now handled by Flask-Migrate
+# Use 'flask db upgrade' to create/update database schema
+# with app.app_context():
+#     db.create_all()
 
 # Helper functions
 def validate_password(password):
