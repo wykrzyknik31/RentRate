@@ -56,6 +56,7 @@ export default function AddReview() {
       const response = await fetch(`${API_URL}/api/reviews`, {
         method: "POST",
         body: formDataToSend,
+        credentials: "include",
       });
 
       if (!response.ok) {
