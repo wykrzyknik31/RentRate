@@ -31,6 +31,155 @@ start_clean.bat
 
 The API will be available at `http://localhost:5000`
 
+## Database Migrations
+
+The RentRate backend uses **Flask-Migrate** (built on Alembic) for database schema management. This ensures consistent database schema across all environments and makes schema changes safe and reproducible.
+
+### Why Migrations?
+
+- ✅ **Version Control**: Database schema is versioned alongside code
+- ✅ **Consistency**: Same schema across development, Docker, and production
+- ✅ **Safety**: No more manual `ALTER TABLE` scripts
+- ✅ **Rollback**: Easy to revert schema changes if needed
+- ✅ **Team Collaboration**: Everyone gets the same database structure
+
+### Initial Setup
+
+The migrations are already initialized in the `migrations/` directory. When you start the application for the first time, migrations will be applied automatically.
+
+### Running Migrations
+
+#### Automatic (Recommended)
+
+Migrations run automatically when using the startup scripts:
+
+```bash
+# The clean start script runs migrations automatically
+./start_clean.sh        # Linux/Mac
+start_clean.bat         # Windows
+```
+
+#### Manual Migration Commands
+
+For more control, you can run migrations manually:
+
+```bash
+# Set the Flask app
+export FLASK_APP=app.py  # Linux/Mac
+set FLASK_APP=app.py     # Windows
+
+# Apply pending migrations
+flask db upgrade
+
+# Check current database version
+flask db current
+
+# View migration history
+flask db history
+```
+
+**Using the helper script (Linux/Mac only):**
+```bash
+./migrate.sh upgrade    # Apply migrations
+./migrate.sh current    # Check current version
+./migrate.sh history    # View history
+```
+
+### Creating New Migrations
+
+When you modify database models in `app.py`:
+
+1. **Generate migration automatically:**
+   ```bash
+   export FLASK_APP=app.py
+   flask db migrate -m "Description of changes"
+   ```
+   
+   Or use the helper script:
+   ```bash
+   ./migrate.sh migrate "Description of changes"
+   ```
+
+2. **Review the generated migration file** in `migrations/versions/`
+   - Check that the changes are correct
+   - Verify both `upgrade()` and `downgrade()` functions
+
+3. **Apply the migration:**
+   ```bash
+   flask db upgrade
+   ```
+
+4. **Commit the migration file** to version control:
+   ```bash
+   git add migrations/versions/
+   git commit -m "Add migration: Description of changes"
+   ```
+
+### Migration Best Practices
+
+- **Always review** generated migrations before applying them
+- **Test migrations** in development before production
+- **One migration per feature** - keep migrations focused
+- **Write descriptive messages** - help your team understand changes
+- **Never modify** applied migrations - create new ones instead
+- **Backup your database** before running migrations in production
+
+### Common Migration Tasks
+
+**Add a new column:**
+```python
+# In app.py, add to your model:
+new_field = db.Column(db.String(100), nullable=True)
+
+# Then generate and apply migration:
+flask db migrate -m "Add new_field to Model"
+flask db upgrade
+```
+
+**Modify a column:**
+```python
+# Change the model definition, then:
+flask db migrate -m "Modify column_name in Model"
+flask db upgrade
+```
+
+**Add an index:**
+```python
+# Add to your model:
+__table_args__ = (
+    db.Index('idx_field_name', 'field_name'),
+)
+
+# Then generate and apply:
+flask db migrate -m "Add index on field_name"
+flask db upgrade
+```
+
+### Troubleshooting
+
+**Issue: "Can't locate revision identified by 'xxxxx'"**
+- Your database is out of sync with migrations
+- Solution: Back up data, drop database, and run `flask db upgrade`
+
+**Issue: Migration fails with data integrity error**
+- The migration conflicts with existing data
+- Solution: Modify migration to handle existing data, or clean the database
+
+**Issue: "Target database is not up to date"**
+- You have pending migrations
+- Solution: Run `flask db upgrade`
+
+### Docker Usage
+
+In Docker, migrations run automatically on container startup via the `startup.sh` script. No manual intervention needed.
+
+```bash
+# Docker Compose handles everything:
+docker compose up --build
+```
+
+The API will be available at `http://localhost:5000`
+
 ## Testing the Server
 
 After starting the server, you can verify it's running correctly:
