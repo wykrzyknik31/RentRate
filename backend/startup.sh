@@ -6,26 +6,19 @@ set -e  # Exit on error
 
 echo "Starting RentRate backend..."
 
-# Run database migration to add city column if needed
-echo "Running city migration..."
-python migrate_add_city.py
+# Set Flask app for migration commands
+export FLASK_APP=app.py
+
+# Run database migrations using Flask-Migrate
+echo "Running database migrations..."
+flask db upgrade
 
 # Check migration status
 if [ $? -eq 0 ]; then
-    echo "City migration completed successfully"
+    echo "✓ Database migrations completed successfully"
 else
-    echo "Warning: City migration encountered issues, but continuing..."
-fi
-
-# Run database migration to add user_id column with proper constraints if needed
-echo "Running user_id migration..."
-python migrate_add_user_id.py
-
-# Check migration status
-if [ $? -eq 0 ]; then
-    echo "User_id migration completed successfully"
-else
-    echo "Warning: User_id migration encountered issues, but continuing..."
+    echo "Error: Database migrations failed!"
+    exit 1
 fi
 
 # Start Flask application

@@ -177,25 +177,37 @@ The Docker setup includes three services:
 
 #### Database Migrations
 
-The backend automatically runs database migrations when the Docker container starts. This ensures your database schema is always up to date.
+The backend uses **Flask-Migrate/Alembic** for database schema management, ensuring consistent and versioned database schemas across all environments.
 
 **How it works:**
-1. The backend container runs `migrate_add_city.py` on startup
-2. The script checks if the database schema needs updates
-3. If the `city` column is missing from the `property` table, it's automatically added
-4. Existing properties get "Unknown" as the default city value
-5. The Flask application starts only after successful migration
+1. The backend container automatically runs `flask db upgrade` on startup
+2. Migrations are applied in order to bring the database to the latest schema version
+3. All schema changes are versioned and tracked in the `migrations/` directory
+4. The Flask application starts only after successful migration
+
+**Key Benefits:**
+- ✅ **No manual ALTER TABLE scripts** - all changes are automated
+- ✅ **Version controlled** - database schema is tracked in git
+- ✅ **Consistent across environments** - same schema in local, Docker, and production
+- ✅ **Safe rollbacks** - easy to revert schema changes if needed
 
 **Upgrading from older versions:**
 ```bash
-# Simply pull and rebuild - migration happens automatically
+# Simply pull and rebuild - migrations happen automatically
 git pull
 docker compose down
 docker compose build
 docker compose up -d
 ```
 
-For detailed migration information, see [Automatic Migration Setup Guide](./docs/AUTOMATIC_MIGRATION_SETUP.md).
+**For local development:**
+```bash
+cd backend
+export FLASK_APP=app.py
+flask db upgrade  # Apply pending migrations
+```
+
+For detailed migration documentation, see the [Backend README](backend/README.md#database-migrations).
 
 ### Local Development Setup (Without Docker)
 
@@ -521,6 +533,44 @@ RentRate/
 
 1. **Backend**: Add new routes in `backend/app.py` and database models
 2. **Frontend**: Create new pages in `frontend/app/` or components in `frontend/app/components/`
+
+### Database Schema Changes
+
+When you need to modify the database schema:
+
+1. **Update the model** in `backend/app.py`
+2. **Generate a migration**:
+   ```bash
+   cd backend
+   export FLASK_APP=app.py
+   flask db migrate -m "Description of your changes"
+   ```
+3. **Review the migration file** in `backend/migrations/versions/`
+4. **Apply the migration**:
+   ```bash
+   flask db upgrade
+   ```
+5. **Commit the migration** to version control:
+   ```bash
+   git add backend/migrations/versions/
+   git commit -m "Add migration: Description of changes"
+   ```
+
+**Example: Adding a new field**
+```python
+# 1. Update model in backend/app.py
+class Property(db.Model):
+    # ... existing fields ...
+    new_field = db.Column(db.String(100), nullable=True)
+
+# 2. Generate migration
+# flask db migrate -m "Add new_field to Property"
+
+# 3. Apply migration
+# flask db upgrade
+```
+
+For more details, see the [Backend Migration Documentation](backend/README.md#database-migrations).
 
 ### Database Schema
 
