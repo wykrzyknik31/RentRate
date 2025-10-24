@@ -92,8 +92,12 @@ def migrate():
                 existing_indexes = inspector.get_indexes('review')
                 index_exists = any(idx['name'] == 'idx_review_user_id' for idx in existing_indexes)
                 
-                if index_exists:
-                    print("Index idx_review_user_id already exists.")
+                # Check if user_id column already exists
+                existing_columns = inspector.get_columns('review')
+                user_id_exists = any(col['name'] == 'user_id' for col in existing_columns)
+                
+                if index_exists and user_id_exists:
+                    print("Index idx_review_user_id and user_id column already exist.")
                 else:
                     # For SQLite, we need to recreate the table to add ON DELETE CASCADE
                     # First, create the new table with proper constraints
@@ -121,13 +125,25 @@ def migrate():
                     conn.execute(text("CREATE INDEX idx_review_user_id ON review_new(user_id)"))
                     
                     # Copy all data from old table to new table
+                    # Check if user_id column exists in old table
                     print("Copying data from old table to new table...")
-                    conn.execute(text("""
-                        INSERT INTO review_new 
-                        SELECT id, property_id, user_id, reviewer_name, rating, 
-                               review_text, landlord_name, landlord_rating, created_at
-                        FROM review
-                    """))
+                    if user_id_exists:
+                        # Copy with user_id if it exists
+                        conn.execute(text("""
+                            INSERT INTO review_new 
+                            SELECT id, property_id, user_id, reviewer_name, rating, 
+                                   review_text, landlord_name, landlord_rating, created_at
+                            FROM review
+                        """))
+                    else:
+                        # Copy without user_id, setting it to NULL
+                        conn.execute(text("""
+                            INSERT INTO review_new (id, property_id, user_id, reviewer_name, rating, 
+                                                   review_text, landlord_name, landlord_rating, created_at)
+                            SELECT id, property_id, NULL, reviewer_name, rating, 
+                                   review_text, landlord_name, landlord_rating, created_at
+                            FROM review
+                        """))
                     
                     # Drop the old table
                     print("Dropping old review table...")
