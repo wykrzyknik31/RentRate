@@ -1,4 +1,8 @@
 """
+⚠️ DEPRECATED: This migration script is deprecated.
+⚠️ Use Flask-Migrate instead: flask db migrate && flask db upgrade
+⚠️ See backend/README.md for migration instructions
+
 Migration script to add city column to property table.
 This script handles adding the city column for existing databases.
 
@@ -50,6 +54,13 @@ def wait_for_db(database_uri, max_retries=5, retry_delay=2):
 
 def migrate():
     """Add city column to property table if it doesn't exist"""
+    print("\n" + "="*70)
+    print("⚠️  WARNING: This script is DEPRECATED!")
+    print("⚠️  Please use Flask-Migrate instead:")
+    print("⚠️    cd backend && flask db upgrade")
+    print("⚠️  See backend/README.md for more information")
+    print("="*70 + "\n")
+    
     database_uri = get_database_uri()
     # Redact password from URI for logging
     if '@' in database_uri:
