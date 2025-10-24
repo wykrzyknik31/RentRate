@@ -207,7 +207,9 @@ export FLASK_APP=app.py
 flask db upgrade  # Apply pending migrations
 ```
 
-For detailed migration documentation, see the [Backend README](backend/README.md#database-migrations).
+**Learn More:**
+- **Quick Reference**: [Backend README - Database Migrations](backend/README.md#database-migrations)
+- **Complete Guide**: [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) - Comprehensive migration documentation with examples
 
 ### Local Development Setup (Without Docker)
 
